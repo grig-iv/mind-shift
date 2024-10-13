@@ -1,4 +1,4 @@
-module go-wm
+module mind-shift
 
 go 1.22.6
 
