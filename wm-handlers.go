@@ -74,3 +74,25 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 		xproto.ConfigureWindow(wm.x.conn, event.Window, event.ValueMask, values)
 	}
 }
+
+func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
+	var client *client = nil
+	for _, c := range wm.clients {
+		if c.window == event.Child {
+			client = c
+			break
+		}
+	}
+
+	if client == nil {
+		return
+	}
+
+	wm.focus(client)
+
+	xproto.AllowEvents(
+		wm.x.conn,
+		xproto.AllowReplayPointer,
+		xproto.TimeCurrentTime,
+	)
+}

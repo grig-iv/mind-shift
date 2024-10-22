@@ -184,6 +184,7 @@ func (wm *windowManager) focus(client *client) {
 		xproto.TimeCurrentTime,
 	)
 
+	wm.grabButtons(client)
 	wm.x.setBorderColor(client.window, uint16(wm.colorTable[focusBorder]))
 
 }
@@ -193,5 +194,32 @@ func (wm *windowManager) unfocus(client *client) {
 		return
 	}
 
+	wm.grabButtons(client)
 	wm.x.setBorderColor(client.window, uint16(wm.colorTable[normBorder]))
+}
+
+func (wm *windowManager) grabButtons(client *client) {
+	xproto.UngrabButton(
+		wm.x.conn,
+		xproto.ButtonIndexAny,
+		client.window,
+		xproto.ButtonMaskAny,
+	)
+
+	if client == wm.focusedClient {
+
+	} else {
+		xproto.GrabButton(
+			wm.x.conn,
+			false,
+			client.window,
+			xproto.ButtonPress|xproto.ButtonRelease,
+			xproto.GrabModeSync,
+			xproto.GrabModeSync,
+			xproto.WindowNone,
+			xproto.CursorNone,
+			xproto.ButtonIndexAny,
+			xproto.ButtonMaskAny,
+		)
+	}
 }

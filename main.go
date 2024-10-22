@@ -57,6 +57,9 @@ func main() {
 		case xproto.DestroyNotifyEvent:
 			log.Println("DestroyNotifyEvent")
 			wm.onDestroyNotify(v)
+		case xproto.ButtonPressEvent:
+			log.Println("ButtonPressEvent")
+			wm.onButtonPressEvent(v)
 		case xproto.CreateNotifyEvent:
 		case xproto.MapNotifyEvent:
 		case xproto.MotionNotifyEvent:
