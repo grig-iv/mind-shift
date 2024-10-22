@@ -49,24 +49,6 @@ func (x xserver) instanceAndClass(win xproto.Window) (string, string) {
 	}
 }
 
-func (x *xserver) setBorder(win xproto.Window, width int) {
-	xproto.ConfigureWindow(
-		x.conn,
-		win,
-		xproto.ConfigWindowBorderWidth,
-		[]uint32{uint32(width)},
-	)
-}
-
-func (x *xserver) setBorderColor(win xproto.Window, color uint16) {
-	xproto.ChangeWindowAttributes(
-		x.conn,
-		win,
-		xproto.CwBorderPixel,
-		[]uint32{uint32(color)},
-	)
-}
-
 func (x *xserver) checkOtherWm() error {
 	values := []uint32{
 		xproto.EventMaskSubstructureRedirect |

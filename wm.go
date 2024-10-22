@@ -124,8 +124,12 @@ func (wm *windowManager) addClient(win xproto.Window) *client {
 		nil,
 	}
 
-	wm.x.setBorder(client.window, 1)
-	wm.x.setBorderColor(client.window, uint16(wm.colorTable[normBorder]))
+	xproto.ChangeWindowAttributes(
+		wm.x.conn,
+		client.window,
+		xproto.CwBorderPixel,
+		[]uint32{uint32(wm.colorTable[normBorder])},
+	)
 
 	wm.clients = append(wm.clients, client)
 
@@ -187,7 +191,13 @@ func (wm *windowManager) focus(client *client) {
 	)
 
 	wm.grabButtons(client)
-	wm.x.setBorderColor(client.window, uint16(wm.colorTable[focusBorder]))
+
+	xproto.ChangeWindowAttributes(
+		wm.x.conn,
+		client.window,
+		xproto.CwBorderPixel,
+		[]uint32{uint32(wm.colorTable[focusBorder])},
+	)
 
 }
 
@@ -197,7 +207,13 @@ func (wm *windowManager) unfocus(client *client) {
 	}
 
 	wm.grabButtons(client)
-	wm.x.setBorderColor(client.window, uint16(wm.colorTable[normBorder]))
+
+	xproto.ChangeWindowAttributes(
+		wm.x.conn,
+		client.window,
+		xproto.CwBorderPixel,
+		[]uint32{uint32(wm.colorTable[normBorder])},
+	)
 }
 
 func (wm *windowManager) grabButtons(client *client) {
