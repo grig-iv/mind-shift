@@ -14,7 +14,21 @@ var (
 )
 
 const (
-	TransientName = "WM_TRANSIENT_FOR"
+	WMTransientName = "WM_TRANSIENT_FOR"
+	WMProtocols     = "WM_PROTOCOLS"
+	WMDelete        = "WM_DELETE_WINDOW"
+	WMState         = "WM_STATE"
+	WMTakeFocus     = "WM_TAKE_FOCUS"
+
+	NetActiveWindow       = "_NET_ACTIVE_WINDOW"
+	NetSupported          = "_NET_SUPPORTED"
+	NetWMName             = "_NET_WM_NAME"
+	NetWMState            = "_NET_WM_STATE"
+	NetWMCheck            = "_NET_SUPPORTING_WM_CHECK"
+	NetWMFullscreen       = "_NET_WM_STATE_FULLSCREEN"
+	NetWMWindowType       = "_NET_WM_WINDOW_TYPE"
+	NetWMWindowTypeDialog = "_NET_WM_WINDOW_TYPE_DIALOG"
+	NetClientList         = "_NET_CLIENT_LIST"
 )
 
 func getAtomProperty(conn *xgb.Conn, win xproto.Window, atomName string) (*xproto.GetPropertyReply, error) {
@@ -25,6 +39,11 @@ func getAtomProperty(conn *xgb.Conn, win xproto.Window, atomName string) (*xprot
 
 	return xproto.GetProperty(conn, false, win, atom, xproto.GetPropertyTypeAny, 0, (1<<32)-1).Reply()
 }
+
+//
+// func setAtomProperty(conn *xgb.Conn) {
+// 	xproto.ChangeProperty(conn,		)
+// }
 
 func getAtom(conn *xgb.Conn, atomName string) (xproto.Atom, error) {
 	atom, ok := findInCache(atomName)

@@ -1,4 +1,4 @@
-module mind-shift
+module github.com/grig-iv/mind-shift
 
 go 1.22.6
 
