@@ -91,12 +91,12 @@ func (wm *windowManager) scan() {
 	}
 }
 
-func (wm *windowManager) addClient(win xproto.Window) {
+func (wm *windowManager) addClient(win xproto.Window) *client {
 	drw := xproto.Drawable(win)
 	geom, err := xproto.GetGeometry(wm.x.conn, drw).Reply()
 	if err != nil {
 		log.Println("GetGeometry error: ", err)
-		return
+		return nil
 	}
 
 	_, class := wm.x.instanceAndClass(win)
@@ -128,6 +128,8 @@ func (wm *windowManager) addClient(win xproto.Window) {
 	wm.x.setBorderColor(client.window, uint16(wm.colorTable[normBorder]))
 
 	wm.clients = append(wm.clients, client)
+
+	return client
 }
 
 func (wm *windowManager) removeClient(oldClient *client) {

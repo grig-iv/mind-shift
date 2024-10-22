@@ -21,8 +21,13 @@ func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 		return
 	}
 
-	wm.addClient(event.Window)
+	client := wm.addClient(event.Window)
 	wm.view(wm.currTag)
+
+	if client != nil {
+		wm.focus(client)
+	}
+
 	xproto.MapWindow(wm.x.conn, event.Window)
 }
 
