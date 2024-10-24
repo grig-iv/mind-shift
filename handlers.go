@@ -81,15 +81,8 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 }
 
 func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
-	var client *client = nil
-	for _, c := range wm.clients {
-		if c.window == event.Child {
-			client = c
-			break
-		}
-	}
-
-	if client == nil {
+	client, ok := wm.windowToClient(event.Child)
+	if !ok {
 		return
 	}
 
