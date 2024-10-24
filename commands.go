@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/BurntSushi/xgb/xproto"
 )
 
@@ -54,6 +56,8 @@ func (wm *windowManager) gotoNextTag() {
 }
 
 func (wm *windowManager) view(tag tag) {
+	log.Println("[wm.view]", tag)
+
 	wm.currTag = tag
 
 	tagClients := make([]*client, 0)
@@ -70,12 +74,11 @@ func (wm *windowManager) view(tag tag) {
 		}
 	}
 
-	screen := wm.setup.DefaultScreen(wm.x.conn)
 	screenGeom := geometry{
 		x:      0,
 		y:      0,
-		width:  int(screen.WidthInPixels),
-		height: int(screen.HeightInPixels),
+		width:  int(wm.x.screen.WidthInPixels),
+		height: int(wm.x.screen.HeightInPixels),
 	}
 
 	geoms := wm.currTag.currLaout.arrange(screenGeom, len(tagClients))
@@ -83,7 +86,7 @@ func (wm *windowManager) view(tag tag) {
 		c.changeGeometry(geoms[i])
 	}
 
-	if len(tagClients) > 0 {
+	if (wm.focusedClient == nil || wm.focusedClient.isOnTag(tag.id) == false) && len(tagClients) > 0 {
 		wm.focus(tagClients[0])
 	}
 }

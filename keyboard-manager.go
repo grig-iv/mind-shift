@@ -45,7 +45,7 @@ func newKeyboardManager(wm *windowManager) (*keyboardManager, error) {
 
 	kbm := &keyboardManager{
 		conn:             wm.x.conn,
-		setup:            wm.setup,
+		setup:            wm.x.setup,
 		gestureToCommand: gestureToCommand,
 	}
 
@@ -57,8 +57,8 @@ func newKeyboardManager(wm *windowManager) (*keyboardManager, error) {
 func getGestureToCommand(wm *windowManager) (map[gesture]command, error) {
 	gestureToCommand := make(map[gesture]command)
 
-	minCode := wm.setup.MinKeycode
-	maxCode := wm.setup.MaxKeycode
+	minCode := wm.x.setup.MinKeycode
+	maxCode := wm.x.setup.MaxKeycode
 
 	mapping, err := xproto.GetKeyboardMapping(wm.x.conn, minCode, byte(maxCode-minCode+1)).Reply()
 	if err != nil {

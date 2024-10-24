@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"strings"
 
 	"github.com/BurntSushi/xgb"
@@ -8,26 +9,30 @@ import (
 )
 
 type xserver struct {
-	conn  *xgb.Conn
-	setup *xproto.SetupInfo
+	conn   *xgb.Conn
+	setup  *xproto.SetupInfo
+	screen *xproto.ScreenInfo
+	root   xproto.Window
 }
 
-func newXserver() (*xserver, error) {
-	conn, err := xgb.NewConn()
+func newXserver() *xserver {
+	var err error = nil
+
+	x := &xserver{}
+
+	x.conn, err = xgb.NewConn()
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
-	setup := xproto.Setup(conn)
+	x.setup = xproto.Setup(x.conn)
+	x.screen = x.setup.DefaultScreen(x.conn)
+	x.root = x.screen.Root
 
-	return &xserver{conn, setup}, nil
+	return x
 }
 
-func (x *xserver) root() xproto.Window {
-	return x.setup.DefaultScreen(x.conn).Root
-}
-
-func (x xserver) instanceAndClass(win xproto.Window) (string, string) {
+func (x *xserver) instanceAndClass(win xproto.Window) (string, string) {
 	wmClass, _ := xproto.GetProperty(
 		x.conn,
 		false,
@@ -63,7 +68,7 @@ func (x *xserver) checkOtherWm() error {
 
 	return xproto.ChangeWindowAttributesChecked(
 		x.conn,
-		x.root(),
+		x.root,
 		xproto.CwEventMask,
 		values,
 	).Check()

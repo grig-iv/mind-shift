@@ -21,18 +21,17 @@ func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 		return
 	}
 
-	client := wm.addClient(event.Window)
-	wm.view(wm.currTag)
-
+	client := wm.manageClient(event.Window)
 	if client != nil {
 		wm.focus(client)
 	}
 
+	wm.view(wm.currTag)
 	xproto.MapWindow(wm.x.conn, event.Window)
 }
 
 func (wm *windowManager) onConfigureNotify(event xproto.ConfigureNotifyEvent) {
-	if event.Window == wm.x.root() {
+	if event.Window == wm.x.root {
 		log.Println("TODO: add handler for when root geometry changed")
 	}
 }
@@ -62,7 +61,7 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 		xproto.SendEvent(
 			wm.x.conn,
 			false,
-			wm.x.root(),
+			wm.x.root,
 			xproto.EventMaskStructureNotify,
 			string(newEvent.Bytes()),
 		)

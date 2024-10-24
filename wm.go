@@ -7,8 +7,7 @@ import (
 )
 
 type windowManager struct {
-	x     *xserver
-	setup *xproto.SetupInfo
+	x *xserver
 
 	tags    []tag
 	clients []*client
@@ -22,17 +21,17 @@ type windowManager struct {
 }
 
 func newWindowManager() (*windowManager, error) {
-	x, err := newXserver()
-	if err != nil {
-		return nil, err
-	}
+	const screenMargin = 16
 
-	masterStack := masterStack{16, 8, 0.5}
+	x := newXserver()
+
+	masterStack := masterStack{screenMargin, 8, 0.5}
 
 	tags := []tag{
 		{1 << 0, masterStack},
 		{1 << 1, masterStack},
 		{1 << 2, masterStack},
+		{1 << 3, masterStack},
 	}
 
 	colormap := x.setup.DefaultScreen(x.conn).DefaultColormap
@@ -40,7 +39,6 @@ func newWindowManager() (*windowManager, error) {
 
 	wr := &windowManager{
 		x,
-		x.setup,
 		tags,
 		make([]*client, 0),
 		tags[0],
@@ -57,7 +55,7 @@ func (wm *windowManager) dispose() {
 }
 
 func (wm *windowManager) scan() {
-	queryTree, err := xproto.QueryTree(wm.x.conn, wm.x.root()).Reply()
+	queryTree, err := xproto.QueryTree(wm.x.conn, wm.x.root).Reply()
 	if err != nil {
 		log.Println(err)
 	}
@@ -87,11 +85,22 @@ func (wm *windowManager) scan() {
 			continue
 		}
 
-		wm.addClient(win)
+		_, class := wm.x.instanceAndClass(win)
+		if class == "bar" {
+			xproto.ChangeWindowAttributes(
+				wm.x.conn,
+				win,
+				xproto.CwBackPixel,
+				[]uint32{0x00ff00ff},
+			)
+		}
+
+		wm.manageClient(win)
+
 	}
 }
 
-func (wm *windowManager) addClient(win xproto.Window) *client {
+func (wm *windowManager) manageClient(win xproto.Window) *client {
 	drw := xproto.Drawable(win)
 	geom, err := xproto.GetGeometry(wm.x.conn, drw).Reply()
 	if err != nil {
@@ -102,6 +111,10 @@ func (wm *windowManager) addClient(win xproto.Window) *client {
 	_, class := wm.x.instanceAndClass(win)
 
 	tag := wm.currTag
+	if wm.isRunning == false {
+		tag = wm.tags[3]
+	}
+
 	switch class {
 	case "org.wezfu":
 		tag = wm.tags[0]
@@ -121,7 +134,6 @@ func (wm *windowManager) addClient(win xproto.Window) *client {
 			height: int(geom.Height),
 		},
 		tag.id,
-		nil,
 	}
 
 	xproto.ChangeWindowAttributes(
@@ -172,6 +184,8 @@ func (wm *windowManager) isClientVisible(client *client) bool {
 }
 
 func (wm *windowManager) focus(client *client) {
+	log.Println("[wm.focuse]", client)
+
 	if client == nil || !wm.isClientVisible(client) {
 		log.Println("Cant focuse client")
 		return
