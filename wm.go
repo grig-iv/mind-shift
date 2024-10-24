@@ -72,7 +72,7 @@ func (wm *windowManager) scan() {
 			continue
 		}
 
-		transient, err := getAtomProperty(wm.x.conn, win, WMTransientName)
+		transient, err := wm.x.getAtomProperty(win, WMTransientName)
 		if err != nil {
 			log.Println(err)
 			continue

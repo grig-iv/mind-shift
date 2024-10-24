@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
@@ -13,6 +14,9 @@ type xserver struct {
 	setup  *xproto.SetupInfo
 	screen *xproto.ScreenInfo
 	root   xproto.Window
+
+	atomMu    sync.Mutex
+	atomCache map[atomName]xproto.Atom
 }
 
 func newXserver() *xserver {
@@ -28,6 +32,7 @@ func newXserver() *xserver {
 	x.setup = xproto.Setup(x.conn)
 	x.screen = x.setup.DefaultScreen(x.conn)
 	x.root = x.screen.Root
+	x.atomCache = make(map[atomName]xproto.Atom)
 
 	return x
 }
