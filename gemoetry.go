@@ -23,21 +23,12 @@ func (geom geometry) shrink(n int) geometry {
 	}
 }
 
-func (geom geometry) shrinkRight(n int) geometry {
-	return geometry{
-		x:      geom.x + n,
-		y:      geom.y,
-		width:  geom.width - n,
-		height: geom.height,
-	}
-}
-
-func (geom geometry) shrinkLeft(n int) geometry {
+func (geom geometry) shrinkTop(n int) geometry {
 	return geometry{
 		x:      geom.x,
-		y:      geom.y,
-		width:  geom.width - n,
-		height: geom.height,
+		y:      geom.y + n,
+		width:  geom.width,
+		height: geom.height - n,
 	}
 }
 
