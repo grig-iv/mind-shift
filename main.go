@@ -41,31 +41,34 @@ func main() {
 			log.Printf("Error: %s\n", xerr)
 		}
 
+		if ev == nil {
+			continue
+		}
+
 		switch v := ev.(type) {
 		case xproto.KeyPressEvent:
-			log.Println("KeyPressEvent")
+			log.Println("-> KeyPressEvent")
 			kbm.onKeyPress(v)
 		case xproto.MapRequestEvent:
-			log.Println("MapRequestEvent")
+			log.Println("-> MapRequestEvent")
 			wm.onMapRequest(v)
 		case xproto.ConfigureNotifyEvent:
-			log.Println("ConfigureNotifyEvent")
 			wm.onConfigureNotify(v)
 		case xproto.ConfigureRequestEvent:
-			log.Println("ConfigureRequestEvent")
+			log.Println("-> ConfigureRequestEvent")
 			wm.onConfigureRequest(v)
 		case xproto.DestroyNotifyEvent:
-			log.Println("DestroyNotifyEvent")
+			log.Println("-> DestroyNotifyEvent")
 			wm.onDestroyNotify(v)
 		case xproto.ButtonPressEvent:
-			log.Println("ButtonPressEvent")
+			log.Println("-> ButtonPressEvent")
 			wm.onButtonPressEvent(v)
 		case xproto.CreateNotifyEvent:
 		case xproto.MapNotifyEvent:
 		case xproto.MotionNotifyEvent:
 			continue
 		default:
-			log.Printf("I don't know about type %T!\n", v)
+			log.Printf("-> [skip] %T\n", v)
 		}
 	}
 }
