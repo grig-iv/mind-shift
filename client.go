@@ -10,7 +10,6 @@ type client struct {
 	window  xproto.Window
 	geom    geometry
 	tagMask uint16
-	next    *client
 }
 
 func (c *client) changeGeometry(newGeom geometry) {
@@ -34,14 +33,6 @@ func (c *client) changeGeometry(newGeom geometry) {
 	xproto.ConfigureWindow(c.conn, c.window, uint16(mask), vals)
 
 	c.geom = newGeom
-}
-
-func (c *client) last() *client {
-	for c.next != nil {
-		c = c.next
-	}
-
-	return c
 }
 
 func (c *client) isOnTag(tagId uint16) bool {
