@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/BurntSushi/xgb/xproto"
+	"github.com/jezek/xgb/xproto"
 )
 
 func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {

@@ -1,7 +1,7 @@
 // taken from https://github.com/BurntSushi/xgbutil/blob/ad855c7130460fb6cf40af9302c649a69082a4ee/keybind/keysymdef.go
 package main
 
-import "github.com/BurntSushi/xgb/xproto"
+import "github.com/jezek/xgb/xproto"
 
 var keysyms map[string]xproto.Keysym = map[string]xproto.Keysym{
 	"VoidSymbol":                  0xffffff,

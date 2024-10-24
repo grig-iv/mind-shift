@@ -3,16 +3,13 @@ package main
 import (
 	"log"
 
-	"github.com/BurntSushi/xgb/xproto"
+	"github.com/jezek/xgb/xproto"
 )
 
 func main() {
-	wm, err := newWindowManager()
-	if err != nil {
-		log.Fatal("Failed to connect to X server:", err)
-	}
+	wm := newWindowManager()
 
-	err = wm.x.checkOtherWm()
+	err := wm.x.checkOtherWm()
 	if err != nil {
 		log.Fatal("Another window manager might aleady be running:", err)
 	}

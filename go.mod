@@ -2,4 +2,4 @@ module github.com/grig-iv/mind-shift
 
 go 1.22.6
 
-require github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc // indirect
+require github.com/jezek/xgb v1.1.1
