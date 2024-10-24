@@ -10,9 +10,9 @@ type windowManager struct {
 	x *xserver
 
 	tags    []tag
-	clients []*client
+	currTag tag
 
-	currTag       tag
+	clients       []*client
 	focusedClient *client
 
 	isRunning bool
@@ -20,34 +20,31 @@ type windowManager struct {
 	colorTable colorTable
 }
 
-func newWindowManager() (*windowManager, error) {
+func newWindowManager() *windowManager {
+	var err error = nil
 	const screenMargin = 16
 
-	x := newXserver()
+	wm := &windowManager{}
+	wm.x = newXserver()
 
 	masterStack := masterStack{screenMargin, 8, 0.5}
-
-	tags := []tag{
+	wm.tags = []tag{
 		{1 << 0, masterStack},
 		{1 << 1, masterStack},
 		{1 << 2, masterStack},
 		{1 << 3, masterStack},
 	}
+	wm.currTag = wm.tags[0]
 
-	colormap := x.setup.DefaultScreen(x.conn).DefaultColormap
-	colorTable, _ := createColorTable(x.conn, colormap)
+	wm.clients = make([]*client, 0)
 
-	wr := &windowManager{
-		x,
-		tags,
-		make([]*client, 0),
-		tags[0],
-		nil,
-		false,
-		colorTable,
+	colormap := wm.x.setup.DefaultScreen(wm.x.conn).DefaultColormap
+	wm.colorTable, err = createColorTable(wm.x.conn, colormap)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	return wr, nil
+	return wm
 }
 
 func (wm *windowManager) dispose() {
