@@ -82,16 +82,6 @@ func (wm *windowManager) scan() {
 			continue
 		}
 
-		_, class := wm.x.instanceAndClass(win)
-		if class == "bar" {
-			xproto.ChangeWindowAttributes(
-				wm.x.conn,
-				win,
-				xproto.CwBackPixel,
-				[]uint32{0x00ff00ff},
-			)
-		}
-
 		wm.manageClient(win)
 
 	}
@@ -181,7 +171,7 @@ func (wm *windowManager) isClientVisible(client *client) bool {
 }
 
 func (wm *windowManager) focus(client *client) {
-	log.Println("[wm.focuse]", client)
+	log.Printf("[wm.focus] win: %d, tag mask: %b", client.window, client.tagMask)
 
 	if client == nil || !wm.isClientVisible(client) {
 		log.Println("Cant focuse client")
@@ -251,4 +241,14 @@ func (wm *windowManager) grabButtons(client *client) {
 			xproto.ButtonMaskAny,
 		)
 	}
+}
+
+func (wm *windowManager) findTag(tagId uint16) (tag, bool) {
+	for _, tag := range wm.tags {
+		if tag.id == tagId {
+			return tag, true
+		}
+	}
+
+	return tag{}, false
 }

@@ -60,12 +60,14 @@ func main() {
 		case xproto.ButtonPressEvent:
 			log.Println("-> ButtonPressEvent")
 			wm.onButtonPressEvent(v)
+		case xproto.ClientMessageEvent:
+			wm.onClientMessageEvent(v)
 		case xproto.CreateNotifyEvent:
 		case xproto.MapNotifyEvent:
 		case xproto.MotionNotifyEvent:
 			continue
 		default:
-			log.Printf("-> [skip] %T\n", v)
+			// log.Printf("-> [skip] %T\n", v)
 		}
 	}
 }

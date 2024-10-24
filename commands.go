@@ -56,7 +56,7 @@ func (wm *windowManager) gotoNextTag() {
 }
 
 func (wm *windowManager) view(tag tag) {
-	log.Println("[wm.view]", tag)
+	log.Println("[wm.view] tag number:", tag.index()+1)
 
 	wm.currTag = tag
 

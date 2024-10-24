@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jezek/xgb/xproto"
 )
@@ -75,6 +76,8 @@ func (x *xserver) findInCache(atomName atomName) (xproto.Atom, bool) {
 }
 
 func (x *xserver) addToCache(atomName atomName, atom xproto.Atom) {
+	log.Printf("[x.addToCache] Name: %s, Value: %d", atomName, atom)
+
 	x.atomMu.Lock()
 	defer x.atomMu.Unlock()
 

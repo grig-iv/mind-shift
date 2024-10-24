@@ -49,6 +49,7 @@ func (x *xserver) instanceAndClass(win xproto.Window) (string, string) {
 	).Reply()
 
 	instAndClass := strings.Split(string(wmClass.Value), "\x00")
+	log.Println("Win:", win, "| inst and class:", instAndClass)
 	switch len(instAndClass) {
 	case 0:
 		return "", ""

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jezek/xgb/xproto"
@@ -99,4 +100,35 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 		xproto.AllowReplayPointer,
 		xproto.TimeCurrentTime,
 	)
+}
+
+func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
+	netActiveAtom, err := wm.x.getAtom(NetActiveWindow)
+	if err == nil && event.Type == netActiveAtom {
+		_, class := wm.x.instanceAndClass(event.Window)
+		fmt.Print(class)
+		if class != "firefox" {
+			return
+		}
+
+		client, ok := wm.windowToClient(event.Window)
+		fmt.Print(ok)
+		if !ok {
+			return
+		}
+
+		tag, ok := wm.findTag(client.tagMask)
+		fmt.Print(ok)
+		if !ok {
+			return
+		}
+
+		if wm.currTag.id == tag.id {
+			fmt.Print("already here")
+			return
+		}
+
+		wm.view(tag)
+		wm.focus(client)
+	}
 }
