@@ -103,7 +103,7 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 }
 
 func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
-	netActiveAtom, err := wm.x.getAtom(NetActiveWindow)
+	netActiveAtom, err := wm.x.atom(NetActiveWindow)
 	if err == nil && event.Type == netActiveAtom {
 		_, class := wm.x.instanceAndClass(event.Window)
 		fmt.Print(class)

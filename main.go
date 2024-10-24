@@ -70,4 +70,6 @@ func main() {
 			// log.Printf("-> [skip] %T\n", v)
 		}
 	}
+
+	wm.cleanup()
 }

@@ -79,3 +79,10 @@ func (x *xserver) checkOtherWm() error {
 		values,
 	).Check()
 }
+
+func (x *xserver) deleteProperty(window xproto.Window, atomName atomName) {
+	atom, err := x.atom(atomName)
+	if err != nil {
+		xproto.DeleteProperty(x.conn, window, atom)
+	}
+}

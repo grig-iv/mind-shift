@@ -72,7 +72,7 @@ func (wm *windowManager) scan() {
 			continue
 		}
 
-		transient, err := wm.x.getAtomProperty(win, WMTransientName)
+		transient, err := wm.x.atomProperty(win, WMTransientName)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -251,4 +251,8 @@ func (wm *windowManager) findTag(tagId uint16) (tag, bool) {
 	}
 
 	return tag{}, false
+}
+
+func (wm *windowManager) cleanup() {
+	wm.x.deleteProperty(wm.x.root, NetActiveWindow)
 }

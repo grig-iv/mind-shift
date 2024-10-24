@@ -27,8 +27,8 @@ const (
 	NetClientList         atomName = "_NET_CLIENT_LIST"
 )
 
-func (x *xserver) getAtomProperty(win xproto.Window, atomName atomName) (*xproto.GetPropertyReply, error) {
-	atom, err := x.getAtom(atomName)
+func (x *xserver) atomProperty(win xproto.Window, atomName atomName) (*xproto.GetPropertyReply, error) {
+	atom, err := x.atom(atomName)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (x *xserver) getAtomProperty(win xproto.Window, atomName atomName) (*xproto
 	).Reply()
 }
 
-func (x *xserver) getAtom(atomName atomName) (xproto.Atom, error) {
+func (x *xserver) atom(atomName atomName) (xproto.Atom, error) {
 	atom, ok := x.findInCache(atomName)
 	if ok {
 		return atom, nil
