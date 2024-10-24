@@ -35,6 +35,11 @@ func (c *client) changeGeometry(newGeom geometry) {
 	c.geom = newGeom
 }
 
-func (c *client) isOnTag(tagId uint16) bool {
+func (c *client) hasTag(tagId uint16) bool {
 	return c.tagMask&tagId != 0
+}
+
+func (c *client) replaceTag(oldTagMask, newTagMask uint16) {
+	c.tagMask = c.tagMask & ^oldTagMask
+	c.tagMask = c.tagMask | newTagMask
 }

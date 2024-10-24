@@ -29,10 +29,10 @@ func newWindowManager() *windowManager {
 
 	masterStack := masterStack{screenMargin, 8, 0.5}
 	wm.tags = []tag{
-		{1 << 0, masterStack},
-		{1 << 1, masterStack},
-		{1 << 2, masterStack},
-		{1 << 3, masterStack},
+		newTagFromIndex(0, masterStack),
+		newTagFromIndex(1, masterStack),
+		newTagFromIndex(2, masterStack),
+		newTagFromIndex(3, masterStack),
 	}
 	wm.currTag = wm.tags[0]
 
@@ -158,7 +158,7 @@ func (wm *windowManager) findClients(tagId uint16) []*client {
 	clients := make([]*client, 0)
 
 	for _, c := range wm.clients {
-		if c.isOnTag(tagId) {
+		if c.hasTag(tagId) {
 			clients = append(clients, c)
 		}
 	}
@@ -177,7 +177,7 @@ func (wm *windowManager) windowToClient(window xproto.Window) (*client, bool) {
 }
 
 func (wm *windowManager) isClientVisible(client *client) bool {
-	return client.isOnTag(wm.currTag.id)
+	return client.hasTag(wm.currTag.id)
 }
 
 func (wm *windowManager) focus(client *client) {

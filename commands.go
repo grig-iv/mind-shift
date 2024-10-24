@@ -62,7 +62,7 @@ func (wm *windowManager) view(tag tag) {
 
 	tagClients := make([]*client, 0)
 	for _, c := range wm.clients {
-		if c.isOnTag(wm.currTag.id) {
+		if c.hasTag(wm.currTag.id) {
 			tagClients = append(tagClients, c)
 		} else {
 			xproto.ConfigureWindow(
@@ -86,7 +86,7 @@ func (wm *windowManager) view(tag tag) {
 		c.changeGeometry(geoms[i])
 	}
 
-	if (wm.focusedClient == nil || wm.focusedClient.isOnTag(tag.id) == false) && len(tagClients) > 0 {
+	if (wm.focusedClient == nil || wm.focusedClient.hasTag(tag.id) == false) && len(tagClients) > 0 {
 		wm.focus(tagClients[0])
 	}
 }
@@ -104,8 +104,7 @@ func (wm *windowManager) moveToTag(tag tag) {
 		return
 	}
 
-	wm.focusedClient.tagMask = wm.focusedClient.tagMask & ^wm.currTag.id
-	wm.focusedClient.tagMask = wm.focusedClient.tagMask | tag.id
+	wm.focusedClient.replaceTag(wm.currTag.id, tag.id)
 
 	for i, c := range wm.clients {
 		if c == wm.focusedClient {
