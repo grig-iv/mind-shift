@@ -62,8 +62,9 @@ func main() {
 			wm.onButtonPressEvent(v)
 		case xproto.ClientMessageEvent:
 			wm.onClientMessageEvent(v)
-		case xproto.CreateNotifyEvent:
 		case xproto.MapNotifyEvent:
+			wm.onMapNotifyEvent(v)
+		case xproto.CreateNotifyEvent:
 		case xproto.MotionNotifyEvent:
 			continue
 		default:

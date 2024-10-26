@@ -9,6 +9,8 @@ import (
 type windowManager struct {
 	x *xserver
 
+	bar *bar
+
 	tags    []tag
 	currTag tag
 
@@ -26,6 +28,7 @@ func newWindowManager() *windowManager {
 
 	wm := &windowManager{}
 	wm.x = newXserver()
+	wm.bar = newBar(wm.x)
 
 	masterStack := masterStack{screenMargin, 8, 0.5}
 	wm.tags = []tag{
@@ -82,20 +85,23 @@ func (wm *windowManager) scan() {
 			continue
 		}
 
-		wm.manageClient(win)
+		_, class := wm.x.instanceAndClass(win)
 
+		if wm.bar.isBar(class) {
+			wm.bar.register(win)
+			continue
+		}
+
+		wm.manageClient(win, class)
 	}
 }
 
-func (wm *windowManager) manageClient(win xproto.Window) *client {
-	drw := xproto.Drawable(win)
-	geom, err := xproto.GetGeometry(wm.x.conn, drw).Reply()
+func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
+	geom, err := wm.x.geometry(win)
 	if err != nil {
 		log.Println("GetGeometry error: ", err)
 		return nil
 	}
-
-	_, class := wm.x.instanceAndClass(win)
 
 	tag := wm.currTag
 	if wm.isRunning == false {
@@ -114,12 +120,7 @@ func (wm *windowManager) manageClient(win xproto.Window) *client {
 	client := &client{
 		wm.x.conn,
 		win,
-		geometry{
-			x:      int(geom.X),
-			y:      int(geom.Y),
-			width:  int(geom.Width),
-			height: int(geom.Height),
-		},
+		geom,
 		tag.id,
 	}
 

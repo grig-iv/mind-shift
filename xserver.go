@@ -49,7 +49,7 @@ func (x *xserver) instanceAndClass(win xproto.Window) (string, string) {
 	).Reply()
 
 	instAndClass := strings.Split(string(wmClass.Value), "\x00")
-	log.Println("Win:", win, "| inst and class:", instAndClass)
+	log.Printf("Win: %d, inst and class: %v", win, instAndClass)
 	switch len(instAndClass) {
 	case 0:
 		return "", ""
@@ -85,4 +85,40 @@ func (x *xserver) deleteProperty(window xproto.Window, atomName atomName) {
 	if err != nil {
 		xproto.DeleteProperty(x.conn, window, atom)
 	}
+}
+
+func (x *xserver) geometry(window xproto.Window) (geometry, error) {
+	drw := xproto.Drawable(window)
+	geom, err := xproto.GetGeometry(x.conn, drw).Reply()
+	if err != nil {
+		return geometry{}, err
+	}
+
+	return geometry{
+		x:      int(geom.X),
+		y:      int(geom.Y),
+		width:  int(geom.Width),
+		height: int(geom.Height),
+	}, nil
+}
+
+func (x *xserver) changeGeometry(win xproto.Window, geom geometry) {
+	geom = geometry{
+		x:      max(geom.x, 0),
+		y:      max(geom.y, 0),
+		width:  max(geom.width, 1),
+		height: max(geom.height, 1),
+	}
+
+	vals := []uint32{
+		uint32(geom.x),
+		uint32(geom.y),
+		uint32(geom.width),
+		uint32(geom.height),
+	}
+
+	mask := xproto.ConfigWindowX | xproto.ConfigWindowY |
+		xproto.ConfigWindowWidth | xproto.ConfigWindowHeight
+
+	xproto.ConfigureWindow(x.conn, win, uint16(mask), vals)
 }

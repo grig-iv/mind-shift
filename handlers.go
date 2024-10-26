@@ -22,7 +22,15 @@ func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 		return
 	}
 
-	client := wm.manageClient(event.Window)
+	_, class := wm.x.instanceAndClass(event.Window)
+
+	if wm.bar.hasBar == false && wm.bar.isBar(class) {
+		wm.bar.register(event.Window)
+		wm.bar.onMapRequest(event)
+		return
+	}
+
+	client := wm.manageClient(event.Window, class)
 	if client != nil {
 		wm.focus(client)
 	}
@@ -38,6 +46,12 @@ func (wm *windowManager) onConfigureNotify(event xproto.ConfigureNotifyEvent) {
 }
 
 func (wm *windowManager) onDestroyNotify(event xproto.DestroyNotifyEvent) {
+	if wm.bar.win == event.Window {
+		wm.bar.onDestroyNotify(event)
+		wm.view(wm.currTag)
+		return
+	}
+
 	if client, ok := wm.windowToClient(event.Window); ok {
 		wm.removeClient(client)
 		wm.view(wm.currTag)
@@ -45,6 +59,11 @@ func (wm *windowManager) onDestroyNotify(event xproto.DestroyNotifyEvent) {
 }
 
 func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) {
+	if wm.bar.win == event.Window {
+		wm.bar.onConfigureRequest(event)
+		return
+	}
+
 	client, ok := wm.windowToClient(event.Window)
 
 	if ok {
@@ -96,6 +115,7 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 }
 
 func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
+	log.Printf("[wm.onClientMessageEvent] Message: %d\n", event.Type)
 	netActiveAtom, err := wm.x.atom(NetActiveWindow)
 	if err == nil && event.Type == netActiveAtom {
 		_, class := wm.x.instanceAndClass(event.Window)
@@ -123,5 +143,11 @@ func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
 
 		wm.view(tag)
 		wm.focus(client)
+	}
+}
+
+func (wm *windowManager) onMapNotifyEvent(event xproto.MapNotifyEvent) {
+	if wm.bar.win == event.Window {
+		wm.view(wm.currTag)
 	}
 }

@@ -81,9 +81,12 @@ func (wm *windowManager) view(tag tag) {
 		height: int(wm.x.screen.HeightInPixels),
 	}
 
+	screenGeom = wm.bar.adjustScreenGeometry(screenGeom)
+
 	geoms := wm.currTag.currLaout.arrange(screenGeom, len(tagClients))
 	for i, c := range tagClients {
-		c.changeGeometry(geoms[i])
+		c.geom = geoms[i]
+		wm.x.changeGeometry(c.window, c.geom)
 	}
 
 	if (wm.focusedClient == nil || wm.focusedClient.hasTag(tag.id) == false) && len(tagClients) > 0 {
