@@ -6,7 +6,7 @@ import (
 )
 
 type color struct {
-	r, g, b uint16
+	r, g, b uint8
 }
 
 type colorTable map[color]uint32
@@ -23,7 +23,13 @@ func createColorTable(conn *xgb.Conn, colormap xproto.Colormap) (map[color]uint3
 
 	colorToCookie := make(map[color]xproto.AllocColorCookie)
 	for _, color := range colors {
-		colorToCookie[color] = xproto.AllocColor(conn, colormap, color.r, color.g, color.b)
+		colorToCookie[color] = xproto.AllocColor(
+			conn,
+			colormap,
+			uint16(color.r)*255,
+			uint16(color.g)*255,
+			uint16(color.b)*255,
+		)
 	}
 
 	for color, cookie := range colorToCookie {
