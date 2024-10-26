@@ -100,6 +100,17 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 }
 
 func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
+	if event.Event == event.Root && event.Detail == xproto.ButtonIndex1 {
+		if event.RootX+20 > int16(wm.x.screen.WidthInPixels) {
+			wm.gotoNextTag()
+			return
+		}
+		if event.RootX < 20 {
+			wm.gotoPrevTag()
+			return
+		}
+	}
+
 	client, ok := wm.windowToClient(event.Child)
 	if !ok {
 		return
