@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jezek/xgb/xproto"
@@ -25,6 +26,8 @@ func main() {
 
 	wm.scan()
 	wm.view(wm.currTag)
+
+	fmt.Print("\n\n")
 
 	wm.isRunning = true
 	for wm.isRunning {
