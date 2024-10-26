@@ -30,10 +30,15 @@ func getKeybindings(wm *windowManager) []keyBinding {
 	return []keyBinding{
 		{xproto.ModMask4 | xproto.ModMask1 | xproto.ModMaskControl, keysyms["q"], wm.quit},
 		{xproto.ModMask4 | xproto.ModMask1, keysyms["q"], wm.killClient},
+
 		{xproto.ModMask4 | xproto.ModMaskControl, keysyms["Prior"], wm.gotoPrevTag},
 		{xproto.ModMask4 | xproto.ModMaskControl, keysyms["Next"], wm.gotoNextTag},
 		{xproto.ModMask4 | xproto.ModMaskShift | xproto.ModMaskControl, keysyms["Prior"], wm.moveToPrevTag},
 		{xproto.ModMask4 | xproto.ModMaskShift | xproto.ModMaskControl, keysyms["Next"], wm.moveToNextTag},
+
+		{xproto.ModMask4, keysyms["t"], func() { wm.gotoWindowOrCreate("org.wezfu", "wezterm") }},
+		{xproto.ModMask4, keysyms["f"], func() { wm.gotoWindowOrCreate("firefox", "firefox") }},
+		{xproto.ModMask4, keysyms["s"], func() { wm.gotoWindowOrCreate("TelegramDesktop", "telegram-desktop") }},
 	}
 }
 

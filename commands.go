@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"os/exec"
+	"time"
 
 	"github.com/jezek/xgb/xproto"
 )
@@ -118,4 +120,42 @@ func (wm *windowManager) moveToTag(tag tag) {
 	}
 
 	wm.view(tag)
+}
+
+func (wm *windowManager) gotoWindow(targetClass string) bool {
+	for _, c := range wm.clients {
+		_, clientClass := wm.x.instanceAndClass(c.window)
+		if targetClass == clientClass {
+			tag, _ := wm.findTag(c.tagMask)
+			if wm.currTag != tag {
+				wm.view(tag)
+			}
+			if wm.focusedClient != c {
+				wm.focus(c)
+			}
+			return true
+		}
+	}
+
+	return false
+}
+
+func (wm *windowManager) gotoWindowOrCreate(targetClass string, command string, args ...string) {
+	found := wm.gotoWindow(targetClass)
+	if found {
+		return
+	}
+
+	go func() {
+		cmd := exec.Command(command, args...)
+		cmd.Start()
+
+		for range 20 {
+			time.Sleep(time.Millisecond * 100)
+			found = wm.gotoWindow(targetClass)
+			if found {
+				return
+			}
+		}
+	}()
 }
