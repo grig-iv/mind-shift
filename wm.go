@@ -137,6 +137,10 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 }
 
 func (wm *windowManager) removeClient(oldClient *client) {
+	if oldClient == wm.focusedClient {
+		wm.focusedClient = nil
+	}
+
 	for i, c := range wm.clients {
 		if c == oldClient {
 			wm.clients = append(wm.clients[:i], wm.clients[i+1:]...)
@@ -172,16 +176,20 @@ func (wm *windowManager) isClientVisible(client *client) bool {
 }
 
 func (wm *windowManager) focus(client *client) {
-	log.Printf("[wm.focus] win: %d, tag mask: %b", client.window, client.tagMask)
+	if wm.focusedClient == client {
+		return
+	}
 
 	if client == nil || !wm.isClientVisible(client) {
 		log.Println("Cant focuse client")
 		return
 	}
 
-	if wm.focusedClient != client {
+	if wm.focusedClient != client && wm.focusedClient != nil {
 		wm.unfocus(wm.focusedClient)
 	}
+
+	log.Printf("[wm.focus] win: %d", client.window)
 
 	wm.focusedClient = client
 
@@ -200,13 +208,10 @@ func (wm *windowManager) focus(client *client) {
 		xproto.CwBorderPixel,
 		[]uint32{uint32(wm.colorTable[focusBorder])},
 	)
-
 }
 
 func (wm *windowManager) unfocus(client *client) {
-	if client == nil {
-		return
-	}
+	log.Printf("[wm.unfocus] win: %d", client.window)
 
 	wm.grabButtons(client)
 
