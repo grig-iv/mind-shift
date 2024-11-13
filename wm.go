@@ -89,6 +89,7 @@ func (wm *windowManager) scan() {
 
 		if wm.bar.isBar(class) {
 			wm.bar.register(win)
+			wm.x.changeGeometry(win, wm.bar.geom)
 			continue
 		}
 

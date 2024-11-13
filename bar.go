@@ -32,7 +32,7 @@ func newBar(x *xserver) *bar {
 		x:      0,
 		y:      0,
 		width:  int(x.screen.WidthInPixels),
-		height: 0,
+		height: 20,
 	}
 
 	return b
@@ -61,13 +61,6 @@ func (b *bar) onMapRequest(event xproto.MapRequestEvent) {
 	if b.win != event.Window {
 		log.Fatal("not a bar")
 	}
-
-	geom, err := b.x.geometry(b.win)
-	if err != nil {
-		return
-	}
-
-	b.geom.height = geom.height
 
 	b.x.changeGeometry(b.win, b.geom)
 
