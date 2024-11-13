@@ -92,6 +92,7 @@ func (wm *windowManager) view(tag tag) {
 	}
 
 	if (wm.focusedClient == nil || wm.focusedClient.hasTag(tag.id) == false) && len(tagClients) > 0 {
+		wm.unfocus(wm.focusedClient)
 		wm.focus(tagClients[0])
 	}
 }
@@ -131,6 +132,7 @@ func (wm *windowManager) gotoWindow(targetClass string) bool {
 				wm.view(tag)
 			}
 			if wm.focusedClient != c {
+				wm.unfocus(wm.focusedClient)
 				wm.focus(c)
 			}
 			return true

@@ -32,6 +32,7 @@ func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 
 	client := wm.manageClient(event.Window, class)
 	if client != nil {
+		wm.unfocus(wm.focusedClient)
 		wm.focus(client)
 	}
 
@@ -111,11 +112,12 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 		}
 	}
 
-	client, ok := wm.windowToClient(event.Child)
+	client, ok := wm.windowToClient(event.Event)
 	if !ok {
 		return
 	}
 
+	wm.unfocus(wm.focusedClient)
 	wm.focus(client)
 
 	xproto.AllowEvents(
@@ -153,6 +155,7 @@ func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
 		}
 
 		wm.view(tag)
+		wm.unfocus(wm.focusedClient)
 		wm.focus(client)
 	}
 }

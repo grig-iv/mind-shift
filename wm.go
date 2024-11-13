@@ -125,6 +125,8 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 		tag.id,
 	}
 
+	wm.grabButtons(client)
+
 	xproto.ChangeWindowAttributes(
 		wm.x.conn,
 		client.window,
@@ -193,13 +195,10 @@ func (wm *windowManager) focus(client *client) {
 		return
 	}
 
-	if wm.focusedClient != client && wm.focusedClient != nil {
-		wm.unfocus(wm.focusedClient)
-	}
-
 	log.Printf("[wm.focus] win: %d", client.window)
 
 	wm.focusedClient = client
+	wm.ungrabButtons(client)
 
 	xproto.SetInputFocus(
 		wm.x.conn,
@@ -207,8 +206,6 @@ func (wm *windowManager) focus(client *client) {
 		client.window,
 		xproto.TimeCurrentTime,
 	)
-
-	wm.grabButtons(client)
 
 	xproto.ChangeWindowAttributes(
 		wm.x.conn,
@@ -219,6 +216,10 @@ func (wm *windowManager) focus(client *client) {
 }
 
 func (wm *windowManager) unfocus(client *client) {
+	if client == nil {
+		return
+	}
+
 	log.Printf("[wm.unfocus] win: %d", client.window)
 
 	wm.grabButtons(client)
@@ -231,7 +232,19 @@ func (wm *windowManager) unfocus(client *client) {
 	)
 }
 
+func (wm *windowManager) ungrabButtons(client *client) {
+	log.Println("[wm.ungrabButtons]", client.window)
+	xproto.UngrabButton(
+		wm.x.conn,
+		xproto.ButtonIndexAny,
+		client.window,
+		xproto.ButtonMaskAny,
+	)
+}
+
 func (wm *windowManager) grabButtons(client *client) {
+	log.Println("[wm.grabButtons]", client.window)
+
 	xproto.UngrabButton(
 		wm.x.conn,
 		xproto.ButtonIndexAny,
@@ -239,22 +252,18 @@ func (wm *windowManager) grabButtons(client *client) {
 		xproto.ButtonMaskAny,
 	)
 
-	if client == wm.focusedClient {
-
-	} else {
-		xproto.GrabButton(
-			wm.x.conn,
-			false,
-			client.window,
-			xproto.ButtonPress|xproto.ButtonRelease,
-			xproto.GrabModeSync,
-			xproto.GrabModeSync,
-			xproto.WindowNone,
-			xproto.CursorNone,
-			xproto.ButtonIndexAny,
-			xproto.ButtonMaskAny,
-		)
-	}
+	xproto.GrabButton(
+		wm.x.conn,
+		false,
+		client.window,
+		xproto.EventMaskButtonPress|xproto.EventMaskButtonRelease,
+		xproto.GrabModeSync,
+		xproto.GrabModeSync,
+		xproto.WindowNone,
+		xproto.CursorNone,
+		xproto.ButtonIndexAny,
+		xproto.ButtonMaskAny,
+	)
 }
 
 func (wm *windowManager) findTag(tagId uint16) (tag, bool) {
