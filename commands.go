@@ -88,6 +88,8 @@ func (wm *windowManager) view(tag tag) {
 	geoms := wm.currTag.currLaout.arrange(screenGeom, len(tagClients))
 	for i, c := range tagClients {
 		c.geom = geoms[i]
+		c.geom.width -= borderWidth * 2
+		c.geom.height -= borderWidth * 2
 		wm.x.changeGeometry(c.window, c.geom)
 	}
 

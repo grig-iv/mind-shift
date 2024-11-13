@@ -138,7 +138,7 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 		wm.x.conn,
 		client.window,
 		xproto.ConfigWindowBorderWidth,
-		[]uint32{uint32(3)},
+		[]uint32{uint32(borderWidth)},
 	)
 
 	wm.clients = append(wm.clients, client)

@@ -7,6 +7,8 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
+const borderWidth = 2
+
 func main() {
 	wm := newWindowManager()
 
