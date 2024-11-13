@@ -12,8 +12,8 @@ type color struct {
 type colorTable map[color]uint32
 
 var (
-	normBorder  = color{68, 68, 68}
-	focusBorder = color{0, 85, 119}
+	normBorder  = color{80, 80, 80}
+	focusBorder = color{20, 90, 160}
 )
 
 func createColorTable(conn *xgb.Conn, colormap xproto.Colormap) (map[color]uint32, error) {

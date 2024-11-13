@@ -75,7 +75,7 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 			Y:                int16(client.geom.y),
 			Width:            uint16(client.geom.width),
 			Height:           uint16(client.geom.height),
-			BorderWidth:      1,
+			BorderWidth:      3,
 			OverrideRedirect: false,
 		}
 		xproto.SendEvent(

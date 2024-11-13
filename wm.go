@@ -131,6 +131,13 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 		[]uint32{uint32(wm.colorTable[normBorder])},
 	)
 
+	xproto.ConfigureWindow(
+		wm.x.conn,
+		client.window,
+		xproto.ConfigWindowBorderWidth,
+		[]uint32{uint32(3)},
+	)
+
 	wm.clients = append(wm.clients, client)
 
 	return client
