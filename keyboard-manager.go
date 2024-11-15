@@ -42,10 +42,10 @@ func getKeybindings(wm *windowManager) []keyBinding {
 	}
 }
 
-func newKeyboardManager(wm *windowManager) (*keyboardManager, error) {
+func newKeyboardManager(wm *windowManager) *keyboardManager {
 	gestureToCommand, err := getGestureToCommand(wm)
 	if err != nil {
-		return nil, err
+		log.Fatal("Failed to creat keyboard manager:", err)
 	}
 
 	kbm := &keyboardManager{
@@ -56,7 +56,7 @@ func newKeyboardManager(wm *windowManager) (*keyboardManager, error) {
 
 	kbm.grabKeys()
 
-	return kbm, nil
+	return kbm
 }
 
 func getGestureToCommand(wm *windowManager) (map[gesture]command, error) {

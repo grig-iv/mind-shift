@@ -17,6 +17,9 @@ type xserver struct {
 
 	atomMu    sync.Mutex
 	atomCache map[atomName]xproto.Atom
+
+	eventCh chan xgb.Event
+	errorCh chan xgb.Error
 }
 
 func newXserver() *xserver {
@@ -34,7 +37,30 @@ func newXserver() *xserver {
 	x.root = x.screen.Root
 	x.atomCache = make(map[atomName]xproto.Atom)
 
+	x.eventCh = make(chan xgb.Event)
+	x.errorCh = make(chan xgb.Error)
+
 	return x
+}
+
+func (x *xserver) loop() {
+	for {
+		ev, xerr := x.conn.WaitForEvent()
+		if ev == nil && xerr == nil {
+			close(x.eventCh)
+			close(x.errorCh)
+			log.Println("Both event and error are nil. Exiting...")
+			return
+		}
+
+		if xerr != nil {
+			x.errorCh <- xerr
+		}
+
+		if ev != nil {
+			x.eventCh <- ev
+		}
+	}
 }
 
 func (x *xserver) instanceAndClass(win xproto.Window) (string, string) {
@@ -60,7 +86,7 @@ func (x *xserver) instanceAndClass(win xproto.Window) (string, string) {
 	}
 }
 
-func (x *xserver) checkOtherWm() error {
+func (x *xserver) checkOtherWm() {
 	values := []uint32{
 		xproto.EventMaskSubstructureRedirect |
 			xproto.EventMaskSubstructureNotify |
@@ -72,12 +98,16 @@ func (x *xserver) checkOtherWm() error {
 			xproto.EventMaskPropertyChange,
 	}
 
-	return xproto.ChangeWindowAttributesChecked(
+	err := xproto.ChangeWindowAttributesChecked(
 		x.conn,
 		x.root,
 		xproto.CwEventMask,
 		values,
 	).Check()
+
+	if err != nil {
+		log.Fatal("Another window manager might aleady be running:", err)
+	}
 }
 
 func (x *xserver) deleteProperty(window xproto.Window, atomName atomName) {

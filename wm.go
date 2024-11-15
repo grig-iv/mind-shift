@@ -276,6 +276,56 @@ func (wm *windowManager) findTag(tagId uint16) (tag, bool) {
 	return tag{}, false
 }
 
+func (wm *windowManager) loop(kbm *keyboardManager) {
+	go wm.x.loop()
+
+	wm.isRunning = true
+	for wm.isRunning {
+		select {
+		case ev, ok := <-wm.x.eventCh:
+			if !ok {
+				return
+			}
+
+			switch v := ev.(type) {
+			case xproto.KeyPressEvent:
+				log.Println("-> KeyPressEvent")
+				kbm.onKeyPress(v)
+			case xproto.MapRequestEvent:
+				log.Println("-> MapRequestEvent")
+				wm.onMapRequest(v)
+			case xproto.ConfigureNotifyEvent:
+				wm.onConfigureNotify(v)
+			case xproto.ConfigureRequestEvent:
+				log.Println("-> ConfigureRequestEvent")
+				wm.onConfigureRequest(v)
+			case xproto.DestroyNotifyEvent:
+				log.Println("-> DestroyNotifyEvent")
+				wm.onDestroyNotify(v)
+			case xproto.ButtonPressEvent:
+				log.Println("-> ButtonPressEvent")
+				wm.onButtonPressEvent(v)
+			case xproto.ClientMessageEvent:
+				wm.onClientMessageEvent(v)
+			case xproto.MapNotifyEvent:
+				wm.onMapNotifyEvent(v)
+			case xproto.CreateNotifyEvent:
+			case xproto.MotionNotifyEvent:
+				continue
+			default:
+				// log.Printf("-> [skip] %T\n", v)
+			}
+
+		case err, ok := <-wm.x.errorCh:
+			if !ok {
+				return
+			}
+
+			log.Printf("Error: %s\n", err)
+		}
+	}
+}
+
 func (wm *windowManager) cleanup() {
 	wm.x.deleteProperty(wm.x.root, NetActiveWindow)
 }
