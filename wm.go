@@ -7,7 +7,8 @@ import (
 )
 
 type windowManager struct {
-	x *xserver
+	x      *xserver
+	socket *socket
 
 	bar *bar
 
@@ -29,6 +30,7 @@ func newWindowManager() *windowManager {
 	wm := &windowManager{}
 	wm.x = newXserver()
 	wm.bar = newBar(wm.x)
+	wm.socket = newSocket()
 
 	masterStack := masterStack{screenMargin, 8, 0.5}
 	wm.tags = []tag{
@@ -278,6 +280,7 @@ func (wm *windowManager) findTag(tagId uint16) (tag, bool) {
 
 func (wm *windowManager) loop(kbm *keyboardManager) {
 	go wm.x.loop()
+	go wm.socket.listen()
 
 	wm.isRunning = true
 	for wm.isRunning {
@@ -322,6 +325,9 @@ func (wm *windowManager) loop(kbm *keyboardManager) {
 			}
 
 			log.Printf("Error: %s\n", err)
+
+		case request := <-wm.socket.requestCh:
+			log.Printf("Request: %s\n", request.command)
 		}
 	}
 }
