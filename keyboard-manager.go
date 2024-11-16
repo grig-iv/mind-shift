@@ -3,14 +3,17 @@ package main
 import (
 	"log"
 
+	"github.com/grig-iv/mind-shift/commands"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 )
 
 type keyboardManager struct {
-	conn             *xgb.Conn
-	setup            *xproto.SetupInfo
-	gestureToCommand map[gesture]command
+	conn  *xgb.Conn
+	setup *xproto.SetupInfo
+	wm    *windowManager
+
+	gestureToCommand map[gesture]commands.Cmd
 }
 
 type gesture struct {
@@ -19,26 +22,26 @@ type gesture struct {
 }
 
 type keyBinding struct {
-	mods    uint16
-	keysym  xproto.Keysym
-	command command
+	mods   uint16
+	keysym xproto.Keysym
+	cmd    commands.Cmd
 }
 
 type command func()
 
-func getKeybindings(wm *windowManager) []keyBinding {
+func getKeybindings() []keyBinding {
 	return []keyBinding{
-		{xproto.ModMask4 | xproto.ModMask1 | xproto.ModMaskControl, keysyms["q"], wm.quit},
-		{xproto.ModMask4 | xproto.ModMask1, keysyms["q"], wm.killClient},
+		{xproto.ModMask4 | xproto.ModMask1 | xproto.ModMaskControl, keysyms["q"], commands.QuitCmd{}},
+		{xproto.ModMask4 | xproto.ModMask1, keysyms["q"], commands.KillClientCmd{}},
 
-		{xproto.ModMask4 | xproto.ModMaskControl, keysyms["Prior"], wm.gotoPrevTag},
-		{xproto.ModMask4 | xproto.ModMaskControl, keysyms["Next"], wm.gotoNextTag},
-		{xproto.ModMask4 | xproto.ModMaskShift | xproto.ModMaskControl, keysyms["Prior"], wm.moveToPrevTag},
-		{xproto.ModMask4 | xproto.ModMaskShift | xproto.ModMaskControl, keysyms["Next"], wm.moveToNextTag},
+		{xproto.ModMask4 | xproto.ModMaskControl, keysyms["Prior"], commands.GoToTagCmd{Dir: commands.Prev}},
+		{xproto.ModMask4 | xproto.ModMaskControl, keysyms["Next"], commands.GoToTagCmd{Dir: commands.Next}},
+		{xproto.ModMask4 | xproto.ModMaskShift | xproto.ModMaskControl, keysyms["Prior"], commands.MoveToTagCmd{Dir: commands.Prev}},
+		{xproto.ModMask4 | xproto.ModMaskShift | xproto.ModMaskControl, keysyms["Next"], commands.MoveToTagCmd{Dir: commands.Next}},
 
-		{xproto.ModMask4, keysyms["t"], func() { wm.gotoWindowOrCreate("org.wezfu", "wezterm") }},
-		{xproto.ModMask4, keysyms["f"], func() { wm.gotoWindowOrCreate("firefox", "firefox") }},
-		{xproto.ModMask4, keysyms["s"], func() { wm.gotoWindowOrCreate("TelegramDesktop", "telegram-desktop") }},
+		{xproto.ModMask4, keysyms["t"], commands.GoToWinOrSpawn{Class: "org.wezfu", SpanCmd: "wezterm"}},
+		{xproto.ModMask4, keysyms["f"], commands.GoToWinOrSpawn{Class: "firefox", SpanCmd: "firefox"}},
+		{xproto.ModMask4, keysyms["s"], commands.GoToWinOrSpawn{Class: "TelegramDesktop", SpanCmd: "telegram-desktop"}},
 	}
 }
 
@@ -51,6 +54,7 @@ func newKeyboardManager(wm *windowManager) *keyboardManager {
 	kbm := &keyboardManager{
 		conn:             wm.x.conn,
 		setup:            wm.x.setup,
+		wm:               wm,
 		gestureToCommand: gestureToCommand,
 	}
 
@@ -59,8 +63,8 @@ func newKeyboardManager(wm *windowManager) *keyboardManager {
 	return kbm
 }
 
-func getGestureToCommand(wm *windowManager) (map[gesture]command, error) {
-	gestureToCommand := make(map[gesture]command)
+func getGestureToCommand(wm *windowManager) (map[gesture]commands.Cmd, error) {
+	gestureToCommand := make(map[gesture]commands.Cmd)
 
 	minCode := wm.x.setup.MinKeycode
 	maxCode := wm.x.setup.MaxKeycode
@@ -73,13 +77,13 @@ func getGestureToCommand(wm *windowManager) (map[gesture]command, error) {
 		log.Println("no key syms")
 	}
 
-	keybindings := getKeybindings(wm)
+	keybindings := getKeybindings()
 	for code := minCode; code >= minCode && code <= maxCode; code++ {
 		for _, kb := range keybindings {
 			index := int(code-minCode) * int(mapping.KeysymsPerKeycode)
 			if kb.keysym == mapping.Keysyms[index] {
 				gesture := gesture{kb.mods, code}
-				gestureToCommand[gesture] = kb.command
+				gestureToCommand[gesture] = kb.cmd
 			}
 		}
 	}
@@ -109,7 +113,7 @@ func (kbm *keyboardManager) grabKeys() {
 
 func (kbm *keyboardManager) onKeyPress(event xproto.KeyPressEvent) {
 	if command, ok := kbm.gestureToCommand[gesture{event.State, event.Detail}]; ok {
-		command()
+		kbm.wm.eval(command)
 	}
 }
 
