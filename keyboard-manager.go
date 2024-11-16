@@ -37,7 +37,7 @@ func getKeybindings() []keyBinding {
 }
 
 func newKeyboardManager(wm *windowManager) *keyboardManager {
-	gestureToCommand, err := getGestureToCommand(wm)
+	gestureToCommand, err := getGestureToCommand()
 	if err != nil {
 		log.Fatal("Failed to creat keyboard manager:", err)
 	}
@@ -52,7 +52,7 @@ func newKeyboardManager(wm *windowManager) *keyboardManager {
 	return kbm
 }
 
-func getGestureToCommand(wm *windowManager) (map[gesture]socket.Cmd, error) {
+func getGestureToCommand() (map[gesture]socket.Cmd, error) {
 	gestureToCommand := make(map[gesture]socket.Cmd)
 
 	minCode := x.Setup.MinKeycode

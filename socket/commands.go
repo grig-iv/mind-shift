@@ -1,5 +1,7 @@
 package socket
 
+import "github.com/grig-iv/mind-shift/domain"
+
 type Cmd interface{}
 
 type QuitCmd struct{}
@@ -7,11 +9,11 @@ type QuitCmd struct{}
 type KillClientCmd struct{}
 
 type GoToTagCmd struct {
-	Dir Dir
+	Dir domain.Dir
 }
 
 type MoveToTagCmd struct {
-	Dir Dir
+	Dir domain.Dir
 }
 
 type GoToWinOrSpawn struct {
@@ -24,10 +26,3 @@ type GoToWinOrSpawn struct {
 type UnknownCmd struct {
 	Command string
 }
-
-type Dir byte
-
-const (
-	Prev Dir = iota
-	Next
-)
