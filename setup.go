@@ -10,6 +10,18 @@ func (wm *windowManager) setup() {
 	wm.x.checkOtherWm()
 	wm.scan()
 	wm.view(wm.currTag)
+
+	cursor, err := wm.x.CreateCursor(leftPtrCursor)
+	if err != nil {
+		log.Println(err)
+	} else {
+		xproto.ChangeWindowAttributes(
+			wm.x.conn,
+			wm.x.root,
+			xproto.CwCursor,
+			[]uint32{uint32(cursor)},
+		)
+	}
 }
 
 func (wm *windowManager) scan() {

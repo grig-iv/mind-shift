@@ -22,6 +22,10 @@ type xserver struct {
 	errorCh chan xgb.Error
 }
 
+const (
+	leftPtrCursor = 68
+)
+
 func newXserver() *xserver {
 	var err error = nil
 
