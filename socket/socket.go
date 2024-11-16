@@ -6,8 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
-
-	"github.com/grig-iv/mind-shift/domain"
+	"strings"
 )
 
 var CommandCh = make(chan Cmd)
@@ -46,20 +45,12 @@ func handle(conn net.Conn) {
 func parseCmd(message string) Cmd {
 	log.Println("Recive message:", message)
 
-	switch message {
-	case "go-to-tag -n":
-		return GoToTagCmd{Dir: domain.Next}
-	case "go-to-tag -p":
-		return GoToTagCmd{Dir: domain.Prev}
-	case "move-to-tag -n":
-		return MoveToTagCmd{Dir: domain.Next}
-	case "move-to-tag -p":
-		return MoveToTagCmd{Dir: domain.Prev}
-	case "kill-client":
-		return KillClientCmd{}
-	case "quit":
-		return QuitCmd{}
+	split := strings.Split(message, " ")
+
+	parser, ok := parsers[split[0]]
+	if !ok {
+		return UnknownCmd{message}
 	}
 
-	return message
+	return parser(split[1:])
 }

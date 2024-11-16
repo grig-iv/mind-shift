@@ -26,3 +26,8 @@ type GoToWinOrSpawn struct {
 type UnknownCmd struct {
 	Command string
 }
+
+type InvalidArgsCmd struct {
+	Command string
+	Args    []string
+}
