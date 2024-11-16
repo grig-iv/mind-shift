@@ -11,9 +11,9 @@ func (wm *windowManager) eval(cmd socket.Cmd) {
 	switch cmd := cmd.(type) {
 	case socket.GoToTagCmd:
 		if cmd.Dir == domain.Prev {
-			wm.gotoNextTag()
-		} else {
 			wm.gotoPrevTag()
+		} else {
+			wm.gotoNextTag()
 		}
 	case socket.GoToWinOrSpawnCmd:
 		wm.gotoWindowOrCreate(cmd.Class, cmd.SpanCmd, cmd.SpanArgs...)
