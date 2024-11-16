@@ -234,7 +234,7 @@ func (wm *windowManager) findTag(tagId uint16) (tag, bool) {
 	return tag{}, false
 }
 
-func (wm *windowManager) loop(kbm *keyboardManager) {
+func (wm *windowManager) loop() {
 	go x.Loop()
 	go socket.Listen()
 
@@ -247,9 +247,6 @@ func (wm *windowManager) loop(kbm *keyboardManager) {
 			}
 
 			switch v := ev.(type) {
-			case xproto.KeyPressEvent:
-				log.Println("-> KeyPressEvent")
-				kbm.onKeyPress(v)
 			case xproto.MapRequestEvent:
 				log.Println("-> MapRequestEvent")
 				wm.onMapRequest(v)

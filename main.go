@@ -16,7 +16,6 @@ func main() {
 
 	fmt.Print("\n\n")
 
-	kbm := newKeyboardManager(wm)
-	wm.loop(kbm)
+	wm.loop()
 	wm.cleanup()
 }

@@ -80,22 +80,20 @@ func InstanceAndClass(win xproto.Window) (string, string) {
 }
 
 func CheckOtherWm() {
-	values := []uint32{
-		xproto.EventMaskSubstructureRedirect |
-			xproto.EventMaskSubstructureNotify |
-			xproto.EventMaskButtonPress |
-			xproto.EventMaskPointerMotion |
-			xproto.EventMaskEnterWindow |
-			xproto.EventMaskLeaveWindow |
-			xproto.EventMaskStructureNotify |
-			xproto.EventMaskPropertyChange,
-	}
+	eventMask := xproto.EventMaskSubstructureRedirect |
+		xproto.EventMaskSubstructureNotify |
+		xproto.EventMaskButtonPress |
+		xproto.EventMaskPointerMotion |
+		xproto.EventMaskEnterWindow |
+		xproto.EventMaskLeaveWindow |
+		xproto.EventMaskStructureNotify |
+		xproto.EventMaskPropertyChange
 
 	err := xproto.ChangeWindowAttributesChecked(
 		Conn,
 		Root,
 		xproto.CwEventMask,
-		values,
+		[]uint32{uint32(eventMask)},
 	).Check()
 
 	if err != nil {

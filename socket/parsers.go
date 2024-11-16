@@ -8,8 +8,9 @@ var parsers = map[string]parser{
 	"quit":        simpleParser(QuitCmd{}),
 	"kill-client": simpleParser(KillClientCmd{}),
 
-	"go-to-tag":   goToTagParser,
-	"move-to-tag": moveToTagParser,
+	"go-to-tag":          goToTagParser,
+	"move-to-tag":        moveToTagParser,
+	"go-to-win-or-spawn": goToWinOrSpawnParser,
 }
 
 func simpleParser(cmd Cmd) parser {
@@ -45,5 +46,17 @@ func moveToTagParser(args []string) Cmd {
 		return MoveToTagCmd{Dir: domain.Prev}
 	default:
 		return InvalidArgsCmd{}
+	}
+}
+
+func goToWinOrSpawnParser(args []string) Cmd {
+	if len(args) < 2 {
+		return InvalidArgsCmd{}
+	}
+
+	return GoToWinOrSpawnCmd{
+		Class:    args[0],
+		SpanCmd:  args[1],
+		SpanArgs: args[2:],
 	}
 }

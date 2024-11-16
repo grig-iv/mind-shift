@@ -52,5 +52,13 @@ func parseCmd(message string) Cmd {
 		return UnknownCmd{message}
 	}
 
-	return parser(split[1:])
+	cmd := parser(split[1:])
+
+	if cmd, ok := cmd.(InvalidArgsCmd); ok {
+		cmd.Command = split[0]
+		cmd.Args = split[1:]
+		return cmd
+	}
+
+	return cmd
 }

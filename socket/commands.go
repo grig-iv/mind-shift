@@ -17,7 +17,6 @@ type MoveToTagCmd struct {
 }
 
 type GoToWinOrSpawnCmd struct {
-	Instance string
 	Class    string
 	SpanCmd  string
 	SpanArgs []string
