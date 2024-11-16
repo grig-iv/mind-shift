@@ -25,7 +25,7 @@ func (wm *windowManager) eval(cmd socket.Cmd) {
 		} else {
 			wm.moveToPrevTag()
 		}
-	case socket.GoToWinOrSpawn:
+	case socket.GoToWinOrSpawnCmd:
 		wm.gotoWindowOrCreate(cmd.Class, cmd.SpanCmd, cmd.SpanArgs...)
 	default:
 		log.Println("Unknown command:", cmd)

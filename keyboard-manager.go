@@ -30,9 +30,9 @@ type command func()
 
 func getKeybindings() []keyBinding {
 	return []keyBinding{
-		{xproto.ModMask4, keysyms["t"], socket.GoToWinOrSpawn{Class: "org.wezfu", SpanCmd: "wezterm"}},
-		{xproto.ModMask4, keysyms["f"], socket.GoToWinOrSpawn{Class: "firefox", SpanCmd: "firefox"}},
-		{xproto.ModMask4, keysyms["s"], socket.GoToWinOrSpawn{Class: "TelegramDesktop", SpanCmd: "telegram-desktop"}},
+		{xproto.ModMask4, keysyms["t"], socket.GoToWinOrSpawnCmd{Class: "org.wezfu", SpanCmd: "wezterm"}},
+		{xproto.ModMask4, keysyms["f"], socket.GoToWinOrSpawnCmd{Class: "firefox", SpanCmd: "firefox"}},
+		{xproto.ModMask4, keysyms["s"], socket.GoToWinOrSpawnCmd{Class: "TelegramDesktop", SpanCmd: "telegram-desktop"}},
 	}
 }
 

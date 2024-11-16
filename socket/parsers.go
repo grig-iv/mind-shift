@@ -12,9 +12,9 @@ var parsers = map[string]parser{
 	"move-to-tag": moveToTagParser,
 }
 
-func simpleParser(t Cmd) parser {
+func simpleParser(cmd Cmd) parser {
 	return func(_ []string) Cmd {
-		return t
+		return cmd
 	}
 }
 

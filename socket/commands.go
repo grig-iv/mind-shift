@@ -16,7 +16,7 @@ type MoveToTagCmd struct {
 	Dir domain.Dir
 }
 
-type GoToWinOrSpawn struct {
+type GoToWinOrSpawnCmd struct {
 	Instance string
 	Class    string
 	SpanCmd  string
