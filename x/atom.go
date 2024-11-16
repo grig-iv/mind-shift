@@ -1,4 +1,4 @@
-package main
+package x
 
 import (
 	"fmt"
@@ -27,14 +27,14 @@ const (
 	NetClientList         atomName = "_NET_CLIENT_LIST"
 )
 
-func (x *xserver) atomProperty(win xproto.Window, atomName atomName) (*xproto.GetPropertyReply, error) {
-	atom, err := x.atom(atomName)
+func AtomProperty(win xproto.Window, atomName atomName) (*xproto.GetPropertyReply, error) {
+	atom, err := Atom(atomName)
 	if err != nil {
 		return nil, err
 	}
 
 	return xproto.GetProperty(
-		x.conn,
+		Conn,
 		false,
 		win,
 		atom,
@@ -44,14 +44,14 @@ func (x *xserver) atomProperty(win xproto.Window, atomName atomName) (*xproto.Ge
 	).Reply()
 }
 
-func (x *xserver) atom(atomName atomName) (xproto.Atom, error) {
-	atom, ok := x.findInCache(atomName)
+func Atom(atomName atomName) (xproto.Atom, error) {
+	atom, ok := findInCache(atomName)
 	if ok {
 		return atom, nil
 	}
 
 	reply, err := xproto.InternAtom(
-		x.conn,
+		Conn,
 		false,
 		uint16(len(atomName)),
 		string(atomName),
@@ -61,25 +61,25 @@ func (x *xserver) atom(atomName atomName) (xproto.Atom, error) {
 		return 0, fmt.Errorf("Atom: Error interning atom '%s': %s", atomName, err)
 	}
 
-	x.addToCache(atomName, reply.Atom)
+	addToCache(atomName, reply.Atom)
 
 	return reply.Atom, nil
 }
 
-func (x *xserver) findInCache(atomName atomName) (xproto.Atom, bool) {
-	x.atomMu.Lock()
-	defer x.atomMu.Unlock()
+func findInCache(atomName atomName) (xproto.Atom, bool) {
+	atomMu.Lock()
+	defer atomMu.Unlock()
 
-	atom, ok := x.atomCache[atomName]
+	atom, ok := atomCache[atomName]
 
 	return atom, ok
 }
 
-func (x *xserver) addToCache(atomName atomName, atom xproto.Atom) {
+func addToCache(atomName atomName, atom xproto.Atom) {
 	log.Printf("[x.addToCache] Name: %s, Value: %d", atomName, atom)
 
-	x.atomMu.Lock()
-	defer x.atomMu.Unlock()
+	atomMu.Lock()
+	defer atomMu.Unlock()
 
-	x.atomCache[atomName] = atom
+	atomCache[atomName] = atom
 }

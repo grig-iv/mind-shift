@@ -4,11 +4,11 @@ import (
 	"log"
 
 	"github.com/grig-iv/mind-shift/socket"
+	"github.com/grig-iv/mind-shift/x"
 	"github.com/jezek/xgb/xproto"
 )
 
 type windowManager struct {
-	x   *xserver
 	bar *bar
 
 	tags    []tag
@@ -19,16 +19,17 @@ type windowManager struct {
 
 	isRunning bool
 
-	colorTable colorTable
+	colorTable x.ColorTable
 }
 
 func newWindowManager() *windowManager {
 	var err error = nil
 	const screenMargin = 16
 
+	x.Initialize()
+
 	wm := &windowManager{}
-	wm.x = newXserver()
-	wm.bar = newBar(wm.x)
+	wm.bar = newBar()
 
 	masterStack := masterStack{screenMargin, 8, 0.5}
 	wm.tags = []tag{
@@ -41,8 +42,8 @@ func newWindowManager() *windowManager {
 
 	wm.clients = make([]*client, 0)
 
-	colormap := wm.x.setup.DefaultScreen(wm.x.conn).DefaultColormap
-	wm.colorTable, err = createColorTable(wm.x.conn, colormap)
+	colormap := x.Setup.DefaultScreen(x.Conn).DefaultColormap
+	wm.colorTable, err = x.CreateColorTable(x.Conn, colormap)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,11 +52,11 @@ func newWindowManager() *windowManager {
 }
 
 func (wm *windowManager) dispose() {
-	wm.x.conn.Close()
+	x.Conn.Close()
 }
 
 func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
-	geom, err := wm.x.geometry(win)
+	geom, err := x.Geometry(win)
 	if err != nil {
 		log.Println("GetGeometry error: ", err)
 		return nil
@@ -76,7 +77,7 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 	}
 
 	client := &client{
-		wm.x.conn,
+		x.Conn,
 		win,
 		geom,
 		tag.id,
@@ -85,14 +86,14 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 	wm.grabButtons(client)
 
 	xproto.ChangeWindowAttributes(
-		wm.x.conn,
+		x.Conn,
 		client.window,
 		xproto.CwBorderPixel,
-		[]uint32{uint32(wm.colorTable[normBorder])},
+		[]uint32{uint32(wm.colorTable[x.NormBorder])},
 	)
 
 	xproto.ConfigureWindow(
-		wm.x.conn,
+		x.Conn,
 		client.window,
 		xproto.ConfigWindowBorderWidth,
 		[]uint32{uint32(borderWidth)},
@@ -158,17 +159,17 @@ func (wm *windowManager) focus(client *client) {
 	wm.ungrabButtons(client)
 
 	xproto.SetInputFocus(
-		wm.x.conn,
+		x.Conn,
 		xproto.InputFocusPointerRoot,
 		client.window,
 		xproto.TimeCurrentTime,
 	)
 
 	xproto.ChangeWindowAttributes(
-		wm.x.conn,
+		x.Conn,
 		client.window,
 		xproto.CwBorderPixel,
-		[]uint32{uint32(wm.colorTable[focusBorder])},
+		[]uint32{uint32(wm.colorTable[x.FocusBorder])},
 	)
 }
 
@@ -182,17 +183,17 @@ func (wm *windowManager) unfocus(client *client) {
 	wm.grabButtons(client)
 
 	xproto.ChangeWindowAttributes(
-		wm.x.conn,
+		x.Conn,
 		client.window,
 		xproto.CwBorderPixel,
-		[]uint32{uint32(wm.colorTable[normBorder])},
+		[]uint32{uint32(wm.colorTable[x.NormBorder])},
 	)
 }
 
 func (wm *windowManager) ungrabButtons(client *client) {
 	log.Println("[wm.ungrabButtons]", client.window)
 	xproto.UngrabButton(
-		wm.x.conn,
+		x.Conn,
 		xproto.ButtonIndexAny,
 		client.window,
 		xproto.ButtonMaskAny,
@@ -203,14 +204,14 @@ func (wm *windowManager) grabButtons(client *client) {
 	log.Println("[wm.grabButtons]", client.window)
 
 	xproto.UngrabButton(
-		wm.x.conn,
+		x.Conn,
 		xproto.ButtonIndexAny,
 		client.window,
 		xproto.ButtonMaskAny,
 	)
 
 	xproto.GrabButton(
-		wm.x.conn,
+		x.Conn,
 		false,
 		client.window,
 		xproto.EventMaskButtonPress|xproto.EventMaskButtonRelease,
@@ -234,13 +235,13 @@ func (wm *windowManager) findTag(tagId uint16) (tag, bool) {
 }
 
 func (wm *windowManager) loop(kbm *keyboardManager) {
-	go wm.x.loop()
+	go x.Loop()
 	go socket.Listen()
 
 	wm.isRunning = true
 	for wm.isRunning {
 		select {
-		case ev, ok := <-wm.x.eventCh:
+		case ev, ok := <-x.EventCh:
 			if !ok {
 				return
 			}
@@ -274,7 +275,7 @@ func (wm *windowManager) loop(kbm *keyboardManager) {
 				// log.Printf("-> [skip] %T\n", v)
 			}
 
-		case err, ok := <-wm.x.errorCh:
+		case err, ok := <-x.ErrorCh:
 			if !ok {
 				return
 			}
@@ -288,5 +289,5 @@ func (wm *windowManager) loop(kbm *keyboardManager) {
 }
 
 func (wm *windowManager) cleanup() {
-	wm.x.deleteProperty(wm.x.root, NetActiveWindow)
+	x.DeleteProperty(x.Root, x.NetActiveWindow)
 }

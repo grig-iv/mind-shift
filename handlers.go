@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/grig-iv/mind-shift/x"
 	"github.com/jezek/xgb/xproto"
 )
 
 func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
-	winAttrs, err := xproto.GetWindowAttributes(wm.x.conn, event.Window).Reply()
+	winAttrs, err := xproto.GetWindowAttributes(x.Conn, event.Window).Reply()
 	if err != nil {
 		log.Println(err)
 		return
@@ -22,7 +23,7 @@ func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 		return
 	}
 
-	_, class := wm.x.instanceAndClass(event.Window)
+	_, class := x.InstanceAndClass(event.Window)
 
 	if wm.bar.hasBar == false && wm.bar.isBar(class) {
 		wm.bar.register(event.Window)
@@ -37,11 +38,11 @@ func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 	}
 
 	wm.view(wm.currTag)
-	xproto.MapWindow(wm.x.conn, event.Window)
+	xproto.MapWindow(x.Conn, event.Window)
 }
 
 func (wm *windowManager) onConfigureNotify(event xproto.ConfigureNotifyEvent) {
-	if event.Window == wm.x.root {
+	if event.Window == x.Root {
 		log.Println("TODO: add handler for when root geometry changed")
 	}
 }
@@ -72,17 +73,17 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 			Event:            client.window,
 			Window:           client.window,
 			AboveSibling:     0,
-			X:                int16(client.geom.x),
-			Y:                int16(client.geom.y),
-			Width:            uint16(client.geom.width),
-			Height:           uint16(client.geom.height),
+			X:                int16(client.geom.X),
+			Y:                int16(client.geom.Y),
+			Width:            uint16(client.geom.Width),
+			Height:           uint16(client.geom.Height),
 			BorderWidth:      borderWidth,
 			OverrideRedirect: false,
 		}
 		xproto.SendEvent(
-			wm.x.conn,
+			x.Conn,
 			false,
-			wm.x.root,
+			x.Root,
 			xproto.EventMaskStructureNotify,
 			string(newEvent.Bytes()),
 		)
@@ -96,13 +97,13 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 			uint32(event.Sibling),
 			uint32(event.StackMode),
 		}
-		xproto.ConfigureWindow(wm.x.conn, event.Window, event.ValueMask, values)
+		xproto.ConfigureWindow(x.Conn, event.Window, event.ValueMask, values)
 	}
 }
 
 func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 	if event.Event == event.Root && event.Detail == xproto.ButtonIndex1 {
-		if event.RootX+20 > int16(wm.x.screen.WidthInPixels) {
+		if event.RootX+20 > int16(x.Screen.WidthInPixels) {
 			wm.gotoNextTag()
 			return
 		}
@@ -121,7 +122,7 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 	wm.focus(client)
 
 	xproto.AllowEvents(
-		wm.x.conn,
+		x.Conn,
 		xproto.AllowReplayPointer,
 		xproto.TimeCurrentTime,
 	)
@@ -129,9 +130,9 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 
 func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
 	log.Printf("[wm.onClientMessageEvent] Message: %d\n", event.Type)
-	netActiveAtom, err := wm.x.atom(NetActiveWindow)
+	netActiveAtom, err := x.Atom(x.NetActiveWindow)
 	if err == nil && event.Type == netActiveAtom {
-		_, class := wm.x.instanceAndClass(event.Window)
+		_, class := x.InstanceAndClass(event.Window)
 		fmt.Print(class)
 		if class != "firefox" {
 			return

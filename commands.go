@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/grig-iv/mind-shift/domain"
+	"github.com/grig-iv/mind-shift/x"
 	"github.com/jezek/xgb/xproto"
 )
 
@@ -24,10 +26,10 @@ func (wm *windowManager) killClient() {
 		return
 	}
 
-	xproto.GrabServer(wm.x.conn)
-	xproto.SetCloseDownMode(wm.x.conn, xproto.CloseDownDestroyAll)
-	xproto.KillClient(wm.x.conn, uint32(wm.focusedClient.window))
-	xproto.UngrabServer(wm.x.conn)
+	xproto.GrabServer(x.Conn)
+	xproto.SetCloseDownMode(x.Conn, xproto.CloseDownDestroyAll)
+	xproto.KillClient(x.Conn, uint32(wm.focusedClient.window))
+	xproto.UngrabServer(x.Conn)
 }
 
 func (wm *windowManager) getPrevTag() tag {
@@ -71,16 +73,16 @@ func (wm *windowManager) view(tag tag) {
 				c.conn,
 				c.window,
 				uint16(xproto.ConfigWindowX),
-				[]uint32{uint32(c.geom.width * -2)},
+				[]uint32{uint32(c.geom.Width * -2)},
 			)
 		}
 	}
 
-	screenGeom := geometry{
-		x:      0,
-		y:      0,
-		width:  int(wm.x.screen.WidthInPixels),
-		height: int(wm.x.screen.HeightInPixels),
+	screenGeom := domain.Geometry{
+		X:      0,
+		Y:      0,
+		Width:  int(x.Screen.WidthInPixels),
+		Height: int(x.Screen.HeightInPixels),
 	}
 
 	screenGeom = wm.bar.adjustScreenGeometry(screenGeom)
@@ -88,9 +90,9 @@ func (wm *windowManager) view(tag tag) {
 	geoms := wm.currTag.currLaout.arrange(screenGeom, len(tagClients))
 	for i, c := range tagClients {
 		c.geom = geoms[i]
-		c.geom.width -= borderWidth * 2
-		c.geom.height -= borderWidth * 2
-		wm.x.changeGeometry(c.window, c.geom)
+		c.geom.Width -= borderWidth * 2
+		c.geom.Height -= borderWidth * 2
+		x.ChangeGeometry(c.window, c.geom)
 	}
 
 	if (wm.focusedClient == nil || wm.focusedClient.hasTag(tag.id) == false) && len(tagClients) > 0 {
@@ -127,7 +129,7 @@ func (wm *windowManager) moveToTag(tag tag) {
 
 func (wm *windowManager) gotoWindow(targetClass string) bool {
 	for _, c := range wm.clients {
-		_, clientClass := wm.x.instanceAndClass(c.window)
+		_, clientClass := x.InstanceAndClass(c.window)
 		if targetClass == clientClass {
 			tag, _ := wm.findTag(c.tagMask)
 			if wm.currTag != tag {

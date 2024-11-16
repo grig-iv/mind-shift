@@ -3,21 +3,22 @@ package main
 import (
 	"log"
 
+	"github.com/grig-iv/mind-shift/x"
 	"github.com/jezek/xgb/xproto"
 )
 
 func (wm *windowManager) setup() {
-	wm.x.checkOtherWm()
+	x.CheckOtherWm()
 	wm.scan()
 	wm.view(wm.currTag)
 
-	cursor, err := wm.x.CreateCursor(leftPtrCursor)
+	cursor, err := x.CreateCursor(x.LeftPtrCursor)
 	if err != nil {
 		log.Println(err)
 	} else {
 		xproto.ChangeWindowAttributes(
-			wm.x.conn,
-			wm.x.root,
+			x.Conn,
+			x.Root,
 			xproto.CwCursor,
 			[]uint32{uint32(cursor)},
 		)
@@ -25,13 +26,13 @@ func (wm *windowManager) setup() {
 }
 
 func (wm *windowManager) scan() {
-	queryTree, err := xproto.QueryTree(wm.x.conn, wm.x.root).Reply()
+	queryTree, err := xproto.QueryTree(x.Conn, x.Root).Reply()
 	if err != nil {
 		log.Println(err)
 	}
 
 	for _, win := range queryTree.Children {
-		winAttrs, err := xproto.GetWindowAttributes(wm.x.conn, win).Reply()
+		winAttrs, err := xproto.GetWindowAttributes(x.Conn, win).Reply()
 		if err != nil {
 			log.Println(err)
 			continue
@@ -45,7 +46,7 @@ func (wm *windowManager) scan() {
 			continue
 		}
 
-		transient, err := wm.x.atomProperty(win, WMTransientName)
+		transient, err := x.AtomProperty(win, x.WMTransientName)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -55,11 +56,11 @@ func (wm *windowManager) scan() {
 			continue
 		}
 
-		_, class := wm.x.instanceAndClass(win)
+		_, class := x.InstanceAndClass(win)
 
 		if wm.bar.isBar(class) {
 			wm.bar.register(win)
-			wm.x.changeGeometry(win, wm.bar.geom)
+			x.ChangeGeometry(win, wm.bar.geom)
 			continue
 		}
 

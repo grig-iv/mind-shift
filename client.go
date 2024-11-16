@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/grig-iv/mind-shift/domain"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 )
@@ -8,7 +9,7 @@ import (
 type client struct {
 	conn    *xgb.Conn
 	window  xproto.Window
-	geom    geometry
+	geom    domain.Geometry
 	tagMask uint16
 }
 

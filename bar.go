@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 
+	"github.com/grig-iv/mind-shift/domain"
+	"github.com/grig-iv/mind-shift/x"
 	"github.com/jezek/xgb/xproto"
 )
 
@@ -16,23 +18,22 @@ const (
 )
 
 type bar struct {
-	x   *xserver
 	win xproto.Window
 
 	isVisible bool
 	hasBar    bool
 
-	geom geometry
+	geom domain.Geometry
 }
 
-func newBar(x *xserver) *bar {
-	b := &bar{x: x}
+func newBar() *bar {
+	b := &bar{}
 
-	b.geom = geometry{
-		x:      0,
-		y:      0,
-		width:  int(x.screen.WidthInPixels),
-		height: 20,
+	b.geom = domain.Geometry{
+		X:      0,
+		Y:      0,
+		Width:  int(x.Screen.WidthInPixels),
+		Height: 20,
 	}
 
 	return b
@@ -49,12 +50,12 @@ func (b *bar) register(win xproto.Window) {
 	b.isVisible = true
 }
 
-func (b *bar) adjustScreenGeometry(screenGeom geometry) geometry {
+func (b *bar) adjustScreenGeometry(screenGeom domain.Geometry) domain.Geometry {
 	if b.hasBar == false || b.isVisible == false {
 		return screenGeom
 	}
 
-	return screenGeom.shrinkTop(b.geom.y + b.geom.height)
+	return screenGeom.ShrinkTop(b.geom.Y + b.geom.Height)
 }
 
 func (b *bar) onMapRequest(event xproto.MapRequestEvent) {
@@ -62,9 +63,9 @@ func (b *bar) onMapRequest(event xproto.MapRequestEvent) {
 		log.Fatal("not a bar")
 	}
 
-	b.x.changeGeometry(b.win, b.geom)
+	x.ChangeGeometry(b.win, b.geom)
 
-	xproto.MapWindow(b.x.conn, event.Window)
+	xproto.MapWindow(x.Conn, event.Window)
 }
 
 func (b *bar) onConfigureRequest(event xproto.ConfigureRequestEvent) {
@@ -72,24 +73,24 @@ func (b *bar) onConfigureRequest(event xproto.ConfigureRequestEvent) {
 		log.Fatal("not a bar")
 	}
 
-	b.geom.height = int(event.Height)
+	b.geom.Height = int(event.Height)
 
 	newEvent := xproto.ConfigureNotifyEvent{
 		Event:            b.win,
 		Window:           b.win,
 		AboveSibling:     0,
-		X:                int16(b.geom.x),
-		Y:                int16(b.geom.y),
-		Width:            uint16(b.geom.width),
-		Height:           uint16(b.geom.height),
+		X:                int16(b.geom.X),
+		Y:                int16(b.geom.Y),
+		Width:            uint16(b.geom.Width),
+		Height:           uint16(b.geom.Height),
 		BorderWidth:      1,
 		OverrideRedirect: false,
 	}
 
 	xproto.SendEvent(
-		b.x.conn,
+		x.Conn,
 		false,
-		b.x.root,
+		x.Root,
 		xproto.EventMaskStructureNotify,
 		string(newEvent.Bytes()),
 	)
