@@ -10,17 +10,13 @@ const borderWidth = 2
 func main() {
 	wm := newWindowManager()
 
-	wm.x.checkOtherWm()
-
 	log.Println("Starting mind-shift")
 
-	kbm := newKeyboardManager(wm)
-
-	wm.scan()
-	wm.view(wm.currTag)
+	wm.setup()
 
 	fmt.Print("\n\n")
 
+	kbm := newKeyboardManager(wm)
 	wm.loop(kbm)
 	wm.cleanup()
 }
