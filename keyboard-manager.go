@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/grig-iv/mind-shift/commands"
+	"github.com/grig-iv/mind-shift/socket"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 )
@@ -13,7 +13,7 @@ type keyboardManager struct {
 	setup *xproto.SetupInfo
 	wm    *windowManager
 
-	gestureToCommand map[gesture]commands.Cmd
+	gestureToCommand map[gesture]socket.Cmd
 }
 
 type gesture struct {
@@ -24,24 +24,16 @@ type gesture struct {
 type keyBinding struct {
 	mods   uint16
 	keysym xproto.Keysym
-	cmd    commands.Cmd
+	cmd    socket.Cmd
 }
 
 type command func()
 
 func getKeybindings() []keyBinding {
 	return []keyBinding{
-		{xproto.ModMask4 | xproto.ModMask1 | xproto.ModMaskControl, keysyms["q"], commands.QuitCmd{}},
-		{xproto.ModMask4 | xproto.ModMask1, keysyms["q"], commands.KillClientCmd{}},
-
-		{xproto.ModMask4 | xproto.ModMaskControl, keysyms["Prior"], commands.GoToTagCmd{Dir: commands.Prev}},
-		{xproto.ModMask4 | xproto.ModMaskControl, keysyms["Next"], commands.GoToTagCmd{Dir: commands.Next}},
-		{xproto.ModMask4 | xproto.ModMaskShift | xproto.ModMaskControl, keysyms["Prior"], commands.MoveToTagCmd{Dir: commands.Prev}},
-		{xproto.ModMask4 | xproto.ModMaskShift | xproto.ModMaskControl, keysyms["Next"], commands.MoveToTagCmd{Dir: commands.Next}},
-
-		{xproto.ModMask4, keysyms["t"], commands.GoToWinOrSpawn{Class: "org.wezfu", SpanCmd: "wezterm"}},
-		{xproto.ModMask4, keysyms["f"], commands.GoToWinOrSpawn{Class: "firefox", SpanCmd: "firefox"}},
-		{xproto.ModMask4, keysyms["s"], commands.GoToWinOrSpawn{Class: "TelegramDesktop", SpanCmd: "telegram-desktop"}},
+		{xproto.ModMask4, keysyms["t"], socket.GoToWinOrSpawn{Class: "org.wezfu", SpanCmd: "wezterm"}},
+		{xproto.ModMask4, keysyms["f"], socket.GoToWinOrSpawn{Class: "firefox", SpanCmd: "firefox"}},
+		{xproto.ModMask4, keysyms["s"], socket.GoToWinOrSpawn{Class: "TelegramDesktop", SpanCmd: "telegram-desktop"}},
 	}
 }
 
@@ -63,8 +55,8 @@ func newKeyboardManager(wm *windowManager) *keyboardManager {
 	return kbm
 }
 
-func getGestureToCommand(wm *windowManager) (map[gesture]commands.Cmd, error) {
-	gestureToCommand := make(map[gesture]commands.Cmd)
+func getGestureToCommand(wm *windowManager) (map[gesture]socket.Cmd, error) {
+	gestureToCommand := make(map[gesture]socket.Cmd)
 
 	minCode := wm.x.setup.MinKeycode
 	maxCode := wm.x.setup.MaxKeycode

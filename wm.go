@@ -3,13 +3,12 @@ package main
 import (
 	"log"
 
+	"github.com/grig-iv/mind-shift/socket"
 	"github.com/jezek/xgb/xproto"
 )
 
 type windowManager struct {
-	x      *xserver
-	socket *socket
-
+	x   *xserver
 	bar *bar
 
 	tags    []tag
@@ -30,7 +29,6 @@ func newWindowManager() *windowManager {
 	wm := &windowManager{}
 	wm.x = newXserver()
 	wm.bar = newBar(wm.x)
-	wm.socket = newSocket()
 
 	masterStack := masterStack{screenMargin, 8, 0.5}
 	wm.tags = []tag{
@@ -280,7 +278,7 @@ func (wm *windowManager) findTag(tagId uint16) (tag, bool) {
 
 func (wm *windowManager) loop(kbm *keyboardManager) {
 	go wm.x.loop()
-	go wm.socket.listen()
+	go socket.Listen()
 
 	wm.isRunning = true
 	for wm.isRunning {
@@ -326,8 +324,8 @@ func (wm *windowManager) loop(kbm *keyboardManager) {
 
 			log.Printf("Error: %s\n", err)
 
-		case request := <-wm.socket.requestCh:
-			log.Printf("Request: %s\n", request.command)
+		case cmd := <-socket.CommandCh:
+			wm.eval(cmd)
 		}
 	}
 }

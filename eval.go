@@ -3,28 +3,28 @@ package main
 import (
 	"log"
 
-	"github.com/grig-iv/mind-shift/commands"
+	"github.com/grig-iv/mind-shift/socket"
 )
 
-func (wm *windowManager) eval(cmd commands.Cmd) {
+func (wm *windowManager) eval(cmd socket.Cmd) {
 	switch cmd := cmd.(type) {
-	case commands.QuitCmd:
+	case socket.QuitCmd:
 		wm.quit()
-	case commands.KillClientCmd:
+	case socket.KillClientCmd:
 		wm.killClient()
-	case commands.GoToTagCmd:
-		if cmd.Dir == commands.Next {
+	case socket.GoToTagCmd:
+		if cmd.Dir == socket.Next {
 			wm.gotoNextTag()
 		} else {
 			wm.gotoPrevTag()
 		}
-	case commands.MoveToTagCmd:
-		if cmd.Dir == commands.Next {
+	case socket.MoveToTagCmd:
+		if cmd.Dir == socket.Next {
 			wm.moveToNextTag()
 		} else {
 			wm.moveToPrevTag()
 		}
-	case commands.GoToWinOrSpawn:
+	case socket.GoToWinOrSpawn:
 		wm.gotoWindowOrCreate(cmd.Class, cmd.SpanCmd, cmd.SpanArgs...)
 	default:
 		log.Println("Unknown command:", cmd)

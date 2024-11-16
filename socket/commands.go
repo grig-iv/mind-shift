@@ -1,4 +1,4 @@
-package commands
+package socket
 
 type Cmd interface{}
 
@@ -19,6 +19,10 @@ type GoToWinOrSpawn struct {
 	Class    string
 	SpanCmd  string
 	SpanArgs []string
+}
+
+type UnknownCmd struct {
+	Command string
 }
 
 type Dir byte
