@@ -104,11 +104,11 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 	if event.Event == event.Root && event.Detail == xproto.ButtonIndex1 {
 		if event.RootX+20 > int16(x.Screen.WidthInPixels) {
-			wm.gotoNextTag()
+			wm.goToNextTag()
 			return
 		}
 		if event.RootX < 20 {
-			wm.gotoPrevTag()
+			wm.goToPrevTag()
 			return
 		}
 	}

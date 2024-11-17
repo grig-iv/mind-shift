@@ -8,6 +8,8 @@ type QuitCmd struct{}
 
 type KillClientCmd struct{}
 
+type FullScreenCmd struct{}
+
 type GoToTagCmd struct {
 	Dir domain.Dir
 }

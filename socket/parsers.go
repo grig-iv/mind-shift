@@ -7,6 +7,7 @@ type parser func(args []string) Cmd
 var parsers = map[string]parser{
 	"quit":        simpleParser(QuitCmd{}),
 	"kill-client": simpleParser(KillClientCmd{}),
+	"full-screen": simpleParser(FullScreenCmd{}),
 
 	"go-to-tag":          goToTagParser,
 	"move-to-tag":        moveToTagParser,

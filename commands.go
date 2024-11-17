@@ -32,34 +32,47 @@ func (wm *windowManager) killClient() {
 	xproto.UngrabServer(x.Conn)
 }
 
-func (wm *windowManager) getPrevTag() tag {
+func (wm *windowManager) toggleFullScreen() {
+	if wm.currTag.fullScreenClient == nil {
+		wm.currTag.fullScreenClient = wm.focusedClient
+		x.ChangeBorderWidth(wm.currTag.fullScreenClient.window, 0)
+		x.Raise(wm.currTag.fullScreenClient.window)
+	} else if wm.currTag.fullScreenClient != nil {
+		x.ChangeBorderWidth(wm.currTag.fullScreenClient.window, borderWidth)
+		wm.currTag.fullScreenClient = nil
+	}
+
+	wm.view(wm.currTag)
+}
+
+func (wm *windowManager) getPrevTag() *tag {
 	for i := range wm.tags {
 		i = len(wm.tags) - i - 1
 		if wm.tags[i] == wm.currTag {
 			return wm.tags[(i-1+len(wm.tags))%len(wm.tags)]
 		}
 	}
-	return tag{}
+	return nil
 }
 
-func (wm *windowManager) getNextTag() tag {
+func (wm *windowManager) getNextTag() *tag {
 	for i := range wm.tags {
 		if wm.tags[i] == wm.currTag {
 			return wm.tags[(i+1)%len(wm.tags)]
 		}
 	}
-	return tag{}
+	return nil
 }
 
-func (wm *windowManager) gotoPrevTag() {
+func (wm *windowManager) goToPrevTag() {
 	wm.view(wm.getPrevTag())
 }
 
-func (wm *windowManager) gotoNextTag() {
+func (wm *windowManager) goToNextTag() {
 	wm.view(wm.getNextTag())
 }
 
-func (wm *windowManager) view(tag tag) {
+func (wm *windowManager) view(tag *tag) {
 	log.Println("[wm.view] tag number:", tag.index()+1)
 
 	wm.currTag = tag
@@ -83,6 +96,12 @@ func (wm *windowManager) view(tag tag) {
 		Y:      0,
 		Width:  int(x.Screen.WidthInPixels),
 		Height: int(x.Screen.HeightInPixels),
+	}
+
+	if tag.fullScreenClient != nil {
+		x.ChangeGeometry(tag.fullScreenClient.window, screenGeom)
+		wm.focus(tag.fullScreenClient)
+		return
 	}
 
 	screenGeom = wm.bar.adjustScreenGeometry(screenGeom)
@@ -109,7 +128,7 @@ func (wm *windowManager) moveToNextTag() {
 	wm.moveToTag(wm.getNextTag())
 }
 
-func (wm *windowManager) moveToTag(tag tag) {
+func (wm *windowManager) moveToTag(tag *tag) {
 	if wm.focusedClient == nil || wm.currTag.id == tag.id {
 		return
 	}

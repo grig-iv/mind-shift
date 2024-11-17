@@ -11,8 +11,8 @@ import (
 type windowManager struct {
 	bar *bar
 
-	tags    []tag
-	currTag tag
+	tags    []*tag
+	currTag *tag
 
 	clients       []*client
 	focusedClient *client
@@ -32,7 +32,7 @@ func newWindowManager() *windowManager {
 	wm.bar = newBar()
 
 	masterStack := masterStack{screenMargin, 8, 0.5}
-	wm.tags = []tag{
+	wm.tags = []*tag{
 		newTagFromIndex(0, masterStack),
 		newTagFromIndex(1, masterStack),
 		newTagFromIndex(2, masterStack),
@@ -85,19 +85,8 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 
 	wm.grabButtons(client)
 
-	xproto.ChangeWindowAttributes(
-		x.Conn,
-		client.window,
-		xproto.CwBorderPixel,
-		[]uint32{uint32(wm.colorTable[x.NormBorder])},
-	)
-
-	xproto.ConfigureWindow(
-		x.Conn,
-		client.window,
-		xproto.ConfigWindowBorderWidth,
-		[]uint32{uint32(borderWidth)},
-	)
+	x.ChangeBorderColor(client.window, wm.colorTable[x.NormBorder])
+	x.ChangeBorderWidth(client.window, borderWidth)
 
 	wm.clients = append(wm.clients, client)
 
@@ -105,8 +94,15 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 }
 
 func (wm *windowManager) removeClient(oldClient *client) {
+
 	if oldClient == wm.focusedClient {
 		wm.focusedClient = nil
+	}
+
+	for _, t := range wm.tags {
+		if t.fullScreenClient == oldClient {
+			t.fullScreenClient = nil
+		}
 	}
 
 	for i, c := range wm.clients {
@@ -165,12 +161,7 @@ func (wm *windowManager) focus(client *client) {
 		xproto.TimeCurrentTime,
 	)
 
-	xproto.ChangeWindowAttributes(
-		x.Conn,
-		client.window,
-		xproto.CwBorderPixel,
-		[]uint32{uint32(wm.colorTable[x.FocusBorder])},
-	)
+	x.ChangeBorderColor(client.window, wm.colorTable[x.FocusBorder])
 }
 
 func (wm *windowManager) unfocus(client *client) {
@@ -182,12 +173,7 @@ func (wm *windowManager) unfocus(client *client) {
 
 	wm.grabButtons(client)
 
-	xproto.ChangeWindowAttributes(
-		x.Conn,
-		client.window,
-		xproto.CwBorderPixel,
-		[]uint32{uint32(wm.colorTable[x.NormBorder])},
-	)
+	x.ChangeBorderColor(client.window, wm.colorTable[x.NormBorder])
 }
 
 func (wm *windowManager) ungrabButtons(client *client) {
@@ -224,14 +210,14 @@ func (wm *windowManager) grabButtons(client *client) {
 	)
 }
 
-func (wm *windowManager) findTag(tagId uint16) (tag, bool) {
+func (wm *windowManager) findTag(tagId uint16) (*tag, bool) {
 	for _, tag := range wm.tags {
 		if tag.id == tagId {
 			return tag, true
 		}
 	}
 
-	return tag{}, false
+	return nil, false
 }
 
 func (wm *windowManager) loop() {

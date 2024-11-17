@@ -143,3 +143,30 @@ func ChangeGeometry(win xproto.Window, geom domain.Geometry) {
 
 	xproto.ConfigureWindow(Conn, win, uint16(mask), vals)
 }
+
+func ChangeBorderWidth(win xproto.Window, width int) {
+	xproto.ConfigureWindow(
+		Conn,
+		win,
+		xproto.ConfigWindowBorderWidth,
+		[]uint32{uint32(width)},
+	)
+}
+
+func ChangeBorderColor(win xproto.Window, pixel uint32) {
+	xproto.ChangeWindowAttributes(
+		Conn,
+		win,
+		xproto.CwBorderPixel,
+		[]uint32{uint32(pixel)},
+	)
+}
+
+func Raise(win xproto.Window) {
+	xproto.ConfigureWindow(
+		Conn,
+		win,
+		xproto.ConfigWindowStackMode,
+		[]uint32{xproto.StackModeAbove},
+	)
+}
