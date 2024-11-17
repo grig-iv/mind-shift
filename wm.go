@@ -83,6 +83,7 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 	}
 
 	wm.applyRules(client, class)
+	wm.updateWindowType(client)
 	wm.grabButtons(client)
 
 	x.ChangeBorderColor(client.window, wm.colorTable[x.NormBorder])
@@ -102,6 +103,18 @@ func (wm *windowManager) applyRules(client *client, class string) {
 		if _, ok := wm.findTag(r.tagId); ok {
 			client.tagMask = r.tagId
 		}
+	}
+}
+
+func (wm *windowManager) updateWindowType(client *client) {
+	state, err := x.AtomProperty(client.window, x.NetWMState)
+	if err == nil && state.Type == x.AtomOrNone(x.NetWMFullscreen) {
+		wm.enableFullscreen(client)
+	}
+
+	wtype, err := x.AtomProperty(client.window, x.NetWMWindowType)
+	if err == nil && wtype.Type == x.AtomOrNone(x.NetWMWindowTypeDialog) {
+		// handle dialogs
 	}
 }
 
