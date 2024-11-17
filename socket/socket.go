@@ -43,6 +43,7 @@ func handle(conn net.Conn) {
 }
 
 func parseCmd(message string) Cmd {
+	fmt.Println()
 	log.Println("Recive message:", message)
 
 	split := strings.Split(message, " ")

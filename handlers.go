@@ -130,22 +130,21 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 
 func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
 	log.Printf("[wm.onClientMessageEvent] Message: %d\n", event.Type)
+
+	client, ok := wm.windowToClient(event.Window)
+	if !ok {
+		log.Println("Client not found", event.Window)
+		return
+	}
+
 	netActiveAtom, err := x.Atom(x.NetActiveWindow)
 	if err == nil && event.Type == netActiveAtom {
 		_, class := x.InstanceAndClass(event.Window)
-		fmt.Print(class)
 		if class != "firefox" {
 			return
 		}
 
-		client, ok := wm.windowToClient(event.Window)
-		fmt.Print(ok)
-		if !ok {
-			return
-		}
-
 		tag, ok := wm.findTag(client.tagMask)
-		fmt.Print(ok)
 		if !ok {
 			return
 		}
