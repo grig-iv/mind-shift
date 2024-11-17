@@ -88,15 +88,36 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 			string(newEvent.Bytes()),
 		)
 	} else {
-		values := []uint32{
-			uint32(event.X),
-			uint32(event.Y),
-			uint32(event.Width),
-			uint32(event.Height),
-			uint32(event.BorderWidth),
-			uint32(event.Sibling),
-			uint32(event.StackMode),
+		values := make([]uint32, 0)
+
+		if event.ValueMask&xproto.ConfigWindowX != 0 {
+			values = append(values, uint32(event.X))
 		}
+
+		if event.ValueMask&xproto.ConfigWindowY != 0 {
+			values = append(values, uint32(event.Y))
+		}
+
+		if event.ValueMask&xproto.ConfigWindowWidth != 0 {
+			values = append(values, uint32(event.Width))
+		}
+
+		if event.ValueMask&xproto.ConfigWindowHeight != 0 {
+			values = append(values, uint32(event.Height))
+		}
+
+		if event.ValueMask&xproto.ConfigWindowBorderWidth != 0 {
+			values = append(values, uint32(event.BorderWidth))
+		}
+
+		if event.ValueMask&xproto.ConfigWindowSibling != 0 {
+			values = append(values, uint32(event.Sibling))
+		}
+
+		if event.ValueMask&xproto.ConfigWindowStackMode != 0 {
+			values = append(values, uint32(event.StackMode))
+		}
+
 		xproto.ConfigureWindow(x.Conn, event.Window, event.ValueMask, values)
 	}
 }
