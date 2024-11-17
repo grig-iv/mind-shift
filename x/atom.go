@@ -44,6 +44,14 @@ func AtomProperty(win xproto.Window, atomName atomName) (*xproto.GetPropertyRepl
 	).Reply()
 }
 
+func AtomOrNone(atomName atomName) xproto.Atom {
+	atom, err := Atom(atomName)
+	if err != nil {
+		return xproto.AtomNone
+	}
+	return atom
+}
+
 func Atom(atomName atomName) (xproto.Atom, error) {
 	atom, ok := findInCache(atomName)
 	if ok {

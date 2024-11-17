@@ -68,10 +68,18 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 	}
 
 	client := &client{
-		x.Conn,
 		win,
 		geom,
 		tag.id,
+		false,
+	}
+
+	transient, err := x.AtomProperty(win, x.WMTransientName)
+	if err != nil {
+		log.Println(err)
+	}
+	if len(transient.Value) != 0 {
+		log.Println("Fount transient window: ", transient)
 	}
 
 	wm.applyRules(client, class)
@@ -101,12 +109,6 @@ func (wm *windowManager) removeClient(oldClient *client) {
 
 	if oldClient == wm.focusedClient {
 		wm.focusedClient = nil
-	}
-
-	for _, t := range wm.tags {
-		if t.fullScreenClient == oldClient {
-			t.fullScreenClient = nil
-		}
 	}
 
 	for i, c := range wm.clients {

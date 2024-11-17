@@ -158,8 +158,14 @@ func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
 		return
 	}
 
-	netActiveAtom, err := x.Atom(x.NetActiveWindow)
-	if err == nil && event.Type == netActiveAtom {
+	switch event.Type {
+	case x.AtomOrNone(x.NetWMState):
+		netWMFullscreen := x.AtomOrNone(x.NetWMFullscreen)
+		if event.Data.Data32[0] == uint32(netWMFullscreen) ||
+			event.Data.Data32[1] == uint32(netWMFullscreen) {
+			// implement full screen logic
+		}
+	case x.AtomOrNone(x.NetActiveWindow):
 		_, class := x.InstanceAndClass(event.Window)
 		if class != "firefox" {
 			return

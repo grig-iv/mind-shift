@@ -3,11 +3,10 @@ package main
 type tag struct {
 	id               uint16
 	currLaout        layout
-	fullScreenClient *client
 }
 
 func newTagFromIndex(index uint, layout layout) *tag {
-	return &tag{1 << index, layout, nil}
+	return &tag{1 << index, layout }
 }
 
 func (tag tag) index() int {

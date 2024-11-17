@@ -2,15 +2,15 @@ package main
 
 import (
 	"github.com/grig-iv/mind-shift/domain"
-	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 )
 
 type client struct {
-	conn    *xgb.Conn
 	window  xproto.Window
 	geom    domain.Geometry
 	tagMask uint16
+
+	isFullscreen bool
 }
 
 func (c *client) hasTag(tagId uint16) bool {

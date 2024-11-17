@@ -32,19 +32,6 @@ func (wm *windowManager) killClient() {
 	xproto.UngrabServer(x.Conn)
 }
 
-func (wm *windowManager) toggleFullScreen() {
-	if wm.currTag.fullScreenClient == nil {
-		wm.currTag.fullScreenClient = wm.focusedClient
-		x.ChangeBorderWidth(wm.currTag.fullScreenClient.window, 0)
-		x.Raise(wm.currTag.fullScreenClient.window)
-	} else if wm.currTag.fullScreenClient != nil {
-		x.ChangeBorderWidth(wm.currTag.fullScreenClient.window, borderWidth)
-		wm.currTag.fullScreenClient = nil
-	}
-
-	wm.view(wm.currTag)
-}
-
 func (wm *windowManager) getPrevTag() *tag {
 	for i := range wm.tags {
 		i = len(wm.tags) - i - 1
@@ -83,7 +70,7 @@ func (wm *windowManager) view(tag *tag) {
 			tagClients = append(tagClients, c)
 		} else {
 			xproto.ConfigureWindow(
-				c.conn,
+				x.Conn,
 				c.window,
 				uint16(xproto.ConfigWindowX),
 				[]uint32{uint32(c.geom.Width * -2)},
@@ -98,20 +85,18 @@ func (wm *windowManager) view(tag *tag) {
 		Height: int(x.Screen.HeightInPixels),
 	}
 
-	if tag.fullScreenClient != nil {
-		x.ChangeGeometry(tag.fullScreenClient.window, screenGeom)
-		wm.focus(tag.fullScreenClient)
-		return
-	}
+	tagAreaGeom := wm.bar.adjustScreenGeometry(screenGeom)
 
-	screenGeom = wm.bar.adjustScreenGeometry(screenGeom)
-
-	geoms := wm.currTag.currLaout.arrange(screenGeom, len(tagClients))
+	geoms := wm.currTag.currLaout.arrange(tagAreaGeom, len(tagClients))
 	for i, c := range tagClients {
-		c.geom = geoms[i]
-		c.geom.Width -= borderWidth * 2
-		c.geom.Height -= borderWidth * 2
-		x.ChangeGeometry(c.window, c.geom)
+		if c.isFullscreen {
+			x.ChangeGeometry(c.window, screenGeom)
+		} else {
+			c.geom = geoms[i]
+			c.geom.Width -= borderWidth * 2
+			c.geom.Height -= borderWidth * 2
+			x.ChangeGeometry(c.window, c.geom)
+		}
 	}
 
 	if (wm.focusedClient == nil || wm.focusedClient.hasTag(tag.id) == false) && len(tagClients) > 0 {
