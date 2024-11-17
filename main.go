@@ -5,8 +5,6 @@ import (
 	"log"
 )
 
-const borderWidth = 2
-
 func main() {
 	wm := newWindowManager()
 

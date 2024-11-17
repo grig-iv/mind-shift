@@ -67,15 +67,6 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 		tag = wm.tags[3]
 	}
 
-	switch class {
-	case "org.wezfu":
-		tag = wm.tags[0]
-	case "firefox":
-		tag = wm.tags[1]
-	case "TelegramDesktop":
-		tag = wm.tags[2]
-	}
-
 	client := &client{
 		x.Conn,
 		win,
@@ -83,6 +74,7 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 		tag.id,
 	}
 
+	wm.applyRules(client, class)
 	wm.grabButtons(client)
 
 	x.ChangeBorderColor(client.window, wm.colorTable[x.NormBorder])
@@ -91,6 +83,18 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 	wm.clients = append(wm.clients, client)
 
 	return client
+}
+
+func (wm *windowManager) applyRules(client *client, class string) {
+	for _, r := range rules {
+		if r.class != class {
+			continue
+		}
+
+		if _, ok := wm.findTag(r.tagId); ok {
+			client.tagMask = r.tagId
+		}
+	}
 }
 
 func (wm *windowManager) removeClient(oldClient *client) {
