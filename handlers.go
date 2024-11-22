@@ -132,6 +132,14 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 			wm.goToPrevTag()
 			return
 		}
+		if event.RootY >= int16(x.Screen.HeightInPixels)-20 &&
+			event.RootX > int16(x.Screen.WidthInPixels)/3 &&
+			event.RootX < int16(x.Screen.WidthInPixels)*2/3 {
+			if wm.focusedClient != nil && !wm.focusedClient.isFullscreen {
+				wm.enableFullscreen(wm.focusedClient)
+			}
+			return
+		}
 	}
 
 	client, ok := wm.windowToClient(event.Event)
