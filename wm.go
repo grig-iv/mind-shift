@@ -255,25 +255,25 @@ func (wm *windowManager) loop() {
 				return
 			}
 
-			switch v := ev.(type) {
+			switch ev := ev.(type) {
 			case xproto.MapRequestEvent:
 				log.Println("-> MapRequestEvent")
-				wm.onMapRequest(v)
+				wm.onMapRequest(ev)
 			case xproto.ConfigureNotifyEvent:
-				wm.onConfigureNotify(v)
+				wm.onConfigureNotify(ev)
 			case xproto.ConfigureRequestEvent:
-				log.Println("-> ConfigureRequestEvent")
-				wm.onConfigureRequest(v)
+				log.Println("-> ConfigureRequestEvent", ev.Window)
+				wm.onConfigureRequest(ev)
 			case xproto.DestroyNotifyEvent:
 				log.Println("-> DestroyNotifyEvent")
-				wm.onDestroyNotify(v)
+				wm.onDestroyNotify(ev)
 			case xproto.ButtonPressEvent:
 				log.Println("-> ButtonPressEvent")
-				wm.onButtonPressEvent(v)
+				wm.onButtonPressEvent(ev)
 			case xproto.ClientMessageEvent:
-				wm.onClientMessageEvent(v)
+				wm.onClientMessageEvent(ev)
 			case xproto.MapNotifyEvent:
-				wm.onMapNotifyEvent(v)
+				wm.onMapNotifyEvent(ev)
 			case xproto.CreateNotifyEvent:
 			case xproto.MotionNotifyEvent:
 				continue
