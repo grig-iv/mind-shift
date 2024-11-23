@@ -55,7 +55,9 @@ func (wm *windowManager) dispose() {
 	x.Conn.Close()
 }
 
-func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
+func (wm *windowManager) manage(win xproto.Window, class string) *client {
+	log.Println("[wm.manage]", win)
+
 	geom, err := x.Geometry(win)
 	if err != nil {
 		log.Println("GetGeometry error: ", err)
@@ -84,7 +86,7 @@ func (wm *windowManager) manageClient(win xproto.Window, class string) *client {
 
 	wm.applyRules(client, class)
 	wm.updateWindowType(client)
-	wm.grabButtons(client)
+	wm.grabAnyButton(client)
 
 	x.ChangeBorderColor(client.window, wm.colorTable[x.NormBorder])
 	x.ChangeBorderWidth(client.window, borderWidth)
@@ -168,10 +170,10 @@ func (wm *windowManager) focus(client *client) {
 		return
 	}
 
-	log.Printf("[wm.focus] win: %d", client.window)
+	log.Printf("[wm.focus] %d", client.window)
 
 	wm.focusedClient = client
-	wm.ungrabButtons(client)
+	wm.ungrabAllButtons(client)
 
 	x.ChangeBorderColor(client.window, wm.colorTable[x.FocusBorder])
 	x.SetInputFocus(client.window)
@@ -190,13 +192,13 @@ func (wm *windowManager) unfocus(client *client) {
 
 	log.Printf("[wm.unfocus] win: %d", client.window)
 
-	wm.grabButtons(client)
+	wm.grabAnyButton(client)
 
 	x.ChangeBorderColor(client.window, wm.colorTable[x.NormBorder])
 }
 
-func (wm *windowManager) ungrabButtons(client *client) {
-	log.Println("[wm.ungrabButtons]", client.window)
+func (wm *windowManager) ungrabAllButtons(client *client) {
+	log.Println("[wm.ungrabAllButtons]", client.window)
 	xproto.UngrabButton(
 		x.Conn,
 		xproto.ButtonIndexAny,
@@ -205,8 +207,8 @@ func (wm *windowManager) ungrabButtons(client *client) {
 	)
 }
 
-func (wm *windowManager) grabButtons(client *client) {
-	log.Println("[wm.grabButtons]", client.window)
+func (wm *windowManager) grabAnyButton(client *client) {
+	log.Println("[wm.grabAnyButton]", client.window)
 
 	xproto.UngrabButton(
 		x.Conn,

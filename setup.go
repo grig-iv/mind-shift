@@ -64,6 +64,6 @@ func (wm *windowManager) scan() {
 			continue
 		}
 
-		wm.manageClient(win, class)
+		wm.manage(win, class)
 	}
 }

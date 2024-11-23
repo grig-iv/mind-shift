@@ -31,7 +31,7 @@ func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 		return
 	}
 
-	client := wm.manageClient(event.Window, class)
+	client := wm.manage(event.Window, class)
 	if client != nil {
 		wm.unfocus(wm.focusedClient)
 		wm.focus(client)
@@ -158,7 +158,7 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 }
 
 func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
-	log.Printf("[wm.onClientMessageEvent] Message: %d\n", event.Type)
+	log.Printf("[wm.onClientMessageEvent] msg: %d; win: %d\n", event.Type, event.Window)
 
 	client, ok := wm.windowToClient(event.Window)
 	if !ok {
