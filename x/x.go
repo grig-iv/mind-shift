@@ -20,7 +20,7 @@ var (
 	ErrorCh = make(chan xgb.Error)
 
 	atomMu    sync.Mutex
-	atomCache = make(map[atomName]xproto.Atom)
+	atomCache = make(map[AtomName]xproto.Atom)
 )
 
 func Initialize() {
@@ -101,7 +101,7 @@ func CheckOtherWm() {
 	}
 }
 
-func DeleteProperty(window xproto.Window, atomName atomName) {
+func DeleteProperty(window xproto.Window, atomName AtomName) {
 	atom, err := Atom(atomName)
 	if err != nil {
 		xproto.DeleteProperty(Conn, window, atom)

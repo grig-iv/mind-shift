@@ -7,27 +7,29 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-type atomName string
+type AtomName string
 
 const (
-	WMTransientName atomName = "WM_TRANSIENT_FOR"
-	WMProtocols     atomName = "WM_PROTOCOLS"
-	WMDelete        atomName = "WM_DELETE_WINDOW"
-	WMState         atomName = "WMatomName_STATE"
-	WMTakeFocus     atomName = "WM_TAKE_FOCUS"
+	// default atoms
+	WMTransientName AtomName = "WM_TRANSIENT_FOR"
+	WMProtocols     AtomName = "WM_PROTOCOLS"
+	WMDelete        AtomName = "WM_DELETE_WINDOW"
+	WMState         AtomName = "WM_STATE"
+	WMTakeFocus     AtomName = "WM_TAKE_FOCUS"
 
-	NetActiveWindow       atomName = "_NET_ACTIVE_WINDOW"
-	NetSupported          atomName = "_NET_SUPPORTED"
-	NetWMName             atomName = "_NET_WM_NAME"
-	NetWMState            atomName = "_NET_WM_STATE"
-	NetWMCheck            atomName = "_NET_SUPPORTING_WM_CHECK"
-	NetWMFullscreen       atomName = "_NET_WM_STATE_FULLSCREEN"
-	NetWMWindowType       atomName = "_NET_WM_WINDOW_TYPE"
-	NetWMWindowTypeDialog atomName = "_NET_WM_WINDOW_TYPE_DIALOG"
-	NetClientList         atomName = "_NET_CLIENT_LIST"
+	// EWMH atoms
+	NetSupported          AtomName = "_NET_SUPPORTED"
+	NetWMName             AtomName = "_NET_WM_NAME"
+	NetWMState            AtomName = "_NET_WM_STATE"
+	NetWMCheck            AtomName = "_NET_SUPPORTING_WM_CHECK"
+	NetWMFullscreen       AtomName = "_NET_WM_STATE_FULLSCREEN"
+	NetActiveWindow       AtomName = "_NET_ACTIVE_WINDOW"
+	NetWMWindowType       AtomName = "_NET_WM_WINDOW_TYPE"
+	NetWMWindowTypeDialog AtomName = "_NET_WM_WINDOW_TYPE_DIALOG"
+	NetClientList         AtomName = "_NET_CLIENT_LIST"
 )
 
-func AtomProperty(win xproto.Window, atomName atomName) (*xproto.GetPropertyReply, error) {
+func AtomProperty(win xproto.Window, atomName AtomName) (*xproto.GetPropertyReply, error) {
 	atom, err := Atom(atomName)
 	if err != nil {
 		return nil, err
@@ -44,7 +46,7 @@ func AtomProperty(win xproto.Window, atomName atomName) (*xproto.GetPropertyRepl
 	).Reply()
 }
 
-func AtomOrNone(atomName atomName) xproto.Atom {
+func AtomOrNone(atomName AtomName) xproto.Atom {
 	atom, err := Atom(atomName)
 	if err != nil {
 		return xproto.AtomNone
@@ -52,7 +54,7 @@ func AtomOrNone(atomName atomName) xproto.Atom {
 	return atom
 }
 
-func Atom(atomName atomName) (xproto.Atom, error) {
+func Atom(atomName AtomName) (xproto.Atom, error) {
 	atom, ok := findInCache(atomName)
 	if ok {
 		return atom, nil
@@ -74,7 +76,7 @@ func Atom(atomName atomName) (xproto.Atom, error) {
 	return reply.Atom, nil
 }
 
-func findInCache(atomName atomName) (xproto.Atom, bool) {
+func findInCache(atomName AtomName) (xproto.Atom, bool) {
 	atomMu.Lock()
 	defer atomMu.Unlock()
 
@@ -83,7 +85,7 @@ func findInCache(atomName atomName) (xproto.Atom, bool) {
 	return atom, ok
 }
 
-func addToCache(atomName atomName, atom xproto.Atom) {
+func addToCache(atomName AtomName, atom xproto.Atom) {
 	log.Printf("[x.addToCache] Name: %s, Value: %d", atomName, atom)
 
 	atomMu.Lock()
