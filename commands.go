@@ -132,33 +132,28 @@ func (wm *windowManager) moveToTag(tag *tag) {
 }
 
 func (wm *windowManager) gotoWindow(targetClass string) bool {
-	for _, c := range wm.clients {
-		_, clientClass := x.InstanceAndClass(c.window)
-		if targetClass == clientClass {
-			tag, _ := wm.findTag(c.tagMask)
-			if wm.currTag != tag {
-				wm.view(tag)
-			}
-			if wm.focusedClient != c {
-				wm.unfocus(wm.focusedClient)
-				wm.focus(c)
-			}
-			return true
+	client, ok := wm.findClientByClass(targetClass)
+	if ok {
+		tag, _ := wm.findTag(client.tagMask)
+		if wm.currTag != tag {
+			wm.view(tag)
+		}
+		if wm.focusedClient != client {
+			wm.unfocus(wm.focusedClient)
+			wm.focus(client)
 		}
 	}
-
-	return false
+	return ok
 }
 
-func (wm *windowManager) gotoWindowOrCreate(targetClass string, command string, args ...string) {
+func (wm *windowManager) gotoWindowOrSpawn(targetClass string, command string, args ...string) {
 	found := wm.gotoWindow(targetClass)
 	if found {
 		return
 	}
 
 	go func() {
-		cmd := exec.Command(command, args...)
-		cmd.Start()
+		exec.Command(command, args...).Start()
 
 		for range 20 {
 			time.Sleep(time.Millisecond * 100)

@@ -188,7 +188,7 @@ func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
 
 	case x.AtomOrNone(x.NetActiveWindow):
 		_, class := x.InstanceAndClass(event.Window)
-		if class != "firefox" {
+		if class != firefoxClass {
 			return
 		}
 

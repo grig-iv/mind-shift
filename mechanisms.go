@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os/exec"
 
 	"github.com/grig-iv/mind-shift/x"
 	"github.com/jezek/xgb/xproto"
@@ -32,4 +33,22 @@ func (wm *windowManager) disableFullscreen(client *client) {
 	client.isFullscreen = false
 	x.ChangeBorderWidth(client.window, borderWidth)
 	wm.view(wm.currTag)
+}
+
+func (wm *windowManager) findClientByClass(targetClass string) (*client, bool) {
+	for _, c := range wm.clients {
+		_, clientClass := x.InstanceAndClass(c.window)
+		if targetClass == clientClass {
+			return c, true
+		}
+	}
+
+	return nil, false
+}
+
+func (wm *windowManager) spawnIfNotExist(targetClass string, command string, args ...string) {
+	_, found := wm.findClientByClass(targetClass)
+	if !found {
+		exec.Command(command, args...).Start()
+	}
 }
