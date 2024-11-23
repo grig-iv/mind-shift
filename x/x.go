@@ -170,3 +170,12 @@ func Raise(win xproto.Window) {
 		[]uint32{xproto.StackModeAbove},
 	)
 }
+
+func SetInputFocus(win xproto.Window) {
+	xproto.SetInputFocus(
+		Conn,
+		xproto.InputFocusPointerRoot,
+		win,
+		xproto.TimeCurrentTime,
+	)
+}

@@ -173,14 +173,8 @@ func (wm *windowManager) focus(client *client) {
 	wm.focusedClient = client
 	wm.ungrabButtons(client)
 
-	xproto.SetInputFocus(
-		x.Conn,
-		xproto.InputFocusPointerRoot,
-		client.window,
-		xproto.TimeCurrentTime,
-	)
-
 	x.ChangeBorderColor(client.window, wm.colorTable[x.FocusBorder])
+	x.SetInputFocus(client.window)
 }
 
 func (wm *windowManager) unfocus(client *client) {
