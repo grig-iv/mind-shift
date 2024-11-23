@@ -175,6 +175,12 @@ func (wm *windowManager) focus(client *client) {
 
 	x.ChangeBorderColor(client.window, wm.colorTable[x.FocusBorder])
 	x.SetInputFocus(client.window)
+	x.ChangeProperty32(
+		x.Root,
+		x.AtomOrNone(x.NetActiveWindow),
+		xproto.AtomWindow,
+		uint(client.window),
+	)
 }
 
 func (wm *windowManager) unfocus(client *client) {
