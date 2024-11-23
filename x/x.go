@@ -179,3 +179,29 @@ func SetInputFocus(win xproto.Window) {
 		xproto.TimeCurrentTime,
 	)
 }
+
+func ChangeProperty32(
+	win xproto.Window,
+	property xproto.Atom,
+	propertyType xproto.Atom,
+	data ...uint) {
+	buf := toBuf32(data...)
+	xproto.ChangeProperty(
+		Conn,
+		xproto.PropModeReplace,
+		Root,
+		property,
+		propertyType,
+		32,
+		uint32(len(buf)/(int(32)/8)),
+		buf,
+	)
+}
+
+func toBuf32(data ...uint) []byte {
+	buf := make([]byte, len(data)*4)
+	for i, datum := range data {
+		xgb.Put32(buf[(i*4):], uint32(datum))
+	}
+	return buf
+}
