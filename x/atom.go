@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 )
 
@@ -44,6 +45,19 @@ func AtomProperty(win xproto.Window, atomName AtomName) (*xproto.GetPropertyRepl
 		0,
 		(1<<32)-1,
 	).Reply()
+}
+
+func AtomPropertyAsAtom(win xproto.Window, atomName AtomName) (xproto.Atom, error) {
+	reply, err := AtomProperty(win, atomName)
+	if err != nil {
+		return 0, err
+	}
+
+	if reply.Format != 32 {
+		return xproto.AtomNone, nil
+	}
+
+	return xproto.Atom(xgb.Get32(reply.Value)), nil
 }
 
 func AtomOrNone(atomName AtomName) xproto.Atom {

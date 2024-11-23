@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/grig-iv/mind-shift/socket"
@@ -84,12 +85,12 @@ func (wm *windowManager) manage(win xproto.Window, class string) *client {
 		log.Println("Fount transient window: ", transient)
 	}
 
+	x.ChangeBorderColor(client.window, wm.colorTable[x.NormBorder])
+	x.ChangeBorderWidth(client.window, borderWidth)
+
 	wm.applyRules(client, class)
 	wm.updateWindowType(client)
 	wm.grabAnyButton(client)
-
-	x.ChangeBorderColor(client.window, wm.colorTable[x.NormBorder])
-	x.ChangeBorderWidth(client.window, borderWidth)
 
 	wm.clients = append(wm.clients, client)
 
@@ -109,13 +110,14 @@ func (wm *windowManager) applyRules(client *client, class string) {
 }
 
 func (wm *windowManager) updateWindowType(client *client) {
-	state, err := x.AtomProperty(client.window, x.NetWMState)
-	if err == nil && state.Type == x.AtomOrNone(x.NetWMFullscreen) {
+	state, err := x.AtomPropertyAsAtom(client.window, x.NetWMState)
+	if err == nil && state == x.AtomOrNone(x.NetWMFullscreen) {
 		wm.enableFullscreen(client)
 	}
 
-	wtype, err := x.AtomProperty(client.window, x.NetWMWindowType)
-	if err == nil && wtype.Type == x.AtomOrNone(x.NetWMWindowTypeDialog) {
+	wtype, err := x.AtomPropertyAsAtom(client.window, x.NetWMWindowType)
+	if err == nil && wtype == x.AtomOrNone(x.NetWMWindowTypeDialog) {
+		fmt.Println("found dialog")
 		// handle dialogs
 	}
 }

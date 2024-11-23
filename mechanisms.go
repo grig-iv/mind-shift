@@ -9,7 +9,7 @@ import (
 )
 
 func (wm *windowManager) enableFullscreen(client *client) {
-	log.Println("Enabling fullscreen. client:", client.window)
+	log.Println("[wm.enableFullscreen]", client.window)
 	x.ChangeProperty32(
 		client.window,
 		x.AtomOrNone(x.NetWMState),
@@ -23,7 +23,7 @@ func (wm *windowManager) enableFullscreen(client *client) {
 }
 
 func (wm *windowManager) disableFullscreen(client *client) {
-	log.Println("Disabling fullscreen. client:", client.window)
+	log.Println("[wm.disableFullscreen]", client.window)
 	x.ChangeProperty32(
 		client.window,
 		x.AtomOrNone(x.NetWMState),
