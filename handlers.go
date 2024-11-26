@@ -32,13 +32,14 @@ func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 	}
 
 	client := wm.manage(event.Window, class)
+
+	wm.view(wm.currTag)
+	xproto.MapWindow(x.Conn, event.Window)
+
 	if client != nil {
 		wm.unfocus(wm.focusedClient)
 		wm.focus(client)
 	}
-
-	wm.view(wm.currTag)
-	xproto.MapWindow(x.Conn, event.Window)
 }
 
 func (wm *windowManager) onConfigureNotify(event xproto.ConfigureNotifyEvent) {
