@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/grig-iv/mind-shift/socket"
 	"github.com/grig-iv/mind-shift/x"
 	"github.com/jezek/xgb/xproto"
 )
@@ -238,57 +237,6 @@ func (wm *windowManager) findTag(tagId uint16) (*tag, bool) {
 	}
 
 	return nil, false
-}
-
-func (wm *windowManager) loop() {
-	go x.Loop()
-	go socket.Listen()
-
-	wm.isRunning = true
-	for wm.isRunning {
-		select {
-		case ev, ok := <-x.EventCh:
-			if !ok {
-				return
-			}
-
-			switch ev := ev.(type) {
-			case xproto.MapRequestEvent:
-				log.Println("-> MapRequestEvent")
-				wm.onMapRequest(ev)
-			case xproto.ConfigureNotifyEvent:
-				wm.onConfigureNotify(ev)
-			case xproto.ConfigureRequestEvent:
-				log.Println("-> ConfigureRequestEvent", ev.Window)
-				wm.onConfigureRequest(ev)
-			case xproto.DestroyNotifyEvent:
-				log.Println("-> DestroyNotifyEvent")
-				wm.onDestroyNotify(ev)
-			case xproto.ButtonPressEvent:
-				log.Println("-> ButtonPressEvent")
-				wm.onButtonPressEvent(ev)
-			case xproto.ClientMessageEvent:
-				wm.onClientMessageEvent(ev)
-			case xproto.MapNotifyEvent:
-				wm.onMapNotifyEvent(ev)
-			case xproto.CreateNotifyEvent:
-			case xproto.MotionNotifyEvent:
-				continue
-			default:
-				// log.Printf("-> [skip] %T\n", v)
-			}
-
-		case err, ok := <-x.ErrorCh:
-			if !ok {
-				return
-			}
-
-			log.Printf("Error: %s\n", err)
-
-		case cmd := <-socket.CommandCh:
-			wm.eval(cmd)
-		}
-	}
 }
 
 func (wm *windowManager) cleanup() {

@@ -4,9 +4,64 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/grig-iv/mind-shift/socket"
 	"github.com/grig-iv/mind-shift/x"
 	"github.com/jezek/xgb/xproto"
 )
+
+func (wm *windowManager) loop() {
+	go x.Loop()
+	go socket.Listen()
+
+	wm.isRunning = true
+	for wm.isRunning {
+		select {
+		case ev, ok := <-x.EventCh:
+			if !ok {
+				return
+			}
+
+			switch ev := ev.(type) {
+			case xproto.MapRequestEvent:
+				log.Println("-> MapRequestEvent")
+				wm.onMapRequest(ev)
+			case xproto.ConfigureNotifyEvent:
+				wm.onConfigureNotify(ev)
+			case xproto.ConfigureRequestEvent:
+				log.Println("-> ConfigureRequestEvent", ev.Window)
+				wm.onConfigureRequest(ev)
+			case xproto.DestroyNotifyEvent:
+				log.Println("-> DestroyNotifyEvent")
+				wm.onDestroyNotify(ev)
+			case xproto.ButtonPressEvent:
+				log.Println("-> ButtonPressEvent")
+				wm.onButtonPressEvent(ev)
+			case xproto.ClientMessageEvent:
+				wm.onClientMessageEvent(ev)
+			case xproto.MapNotifyEvent:
+				wm.onMapNotifyEvent(ev)
+			case xproto.PropertyNotifyEvent:
+				log.Println("-> PropertyNotifyEvent")
+				wm.propertyNotifyEvent(ev)
+			case xproto.CreateNotifyEvent:
+			case xproto.MotionNotifyEvent:
+				continue
+			default:
+				// log.Printf("-> [skip] %T\n", v)
+			}
+
+		case err, ok := <-x.ErrorCh:
+			if !ok {
+				return
+			}
+
+			log.Printf("Error: %s\n", err)
+
+		case cmd := <-socket.CommandCh:
+			wm.eval(cmd)
+		}
+	}
+}
 
 func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 	winAttrs, err := xproto.GetWindowAttributes(x.Conn, event.Window).Reply()
@@ -212,5 +267,25 @@ func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
 func (wm *windowManager) onMapNotifyEvent(event xproto.MapNotifyEvent) {
 	if wm.bar.win == event.Window {
 		wm.view(wm.currTag)
+	}
+}
+
+func (wm *windowManager) propertyNotifyEvent(event xproto.PropertyNotifyEvent) {
+	if event.State == xproto.PropertyDelete {
+		return
+	}
+
+	client, ok := wm.windowToClient(event.Window)
+	if !ok {
+		return
+	}
+
+	switch event.Atom {
+	case xproto.AtomWmHints:
+		fmt.Println("TODO: add handaling for AtomWmHints")
+	case xproto.AtomWmTransientFor:
+		fmt.Println("TODO: add handaling for AtomWmTransientFor")
+	case x.AtomOrNone(x.NetWMWindowType):
+		wm.updateWindowType(client)
 	}
 }
