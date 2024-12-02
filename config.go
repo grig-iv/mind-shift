@@ -19,7 +19,7 @@ var rules = []rule{
 	{telegramClass, 1 << 2},
 }
 
-func onStartup(wm *windowManager) {
+func onStartup(wm *wm) {
 	wm.spawnIfNotExist(weztermClass, "wezterm", "-e", "tmuxp", "load", "main", "-y")
 	wm.spawnIfNotExist(firefoxClass, "firefox")
 	wm.spawnIfNotExist(telegramClass, "telegram-desktop")

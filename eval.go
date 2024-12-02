@@ -7,7 +7,7 @@ import (
 	"github.com/grig-iv/mind-shift/socket"
 )
 
-func (wm *windowManager) eval(cmd socket.Cmd) {
+func (wm *wm) eval(cmd socket.Cmd) {
 	switch cmd := cmd.(type) {
 
 	case socket.GoToTagCmd:

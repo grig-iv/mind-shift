@@ -8,7 +8,7 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-type windowManager struct {
+type wm struct {
 	bar *bar
 
 	tags    []*tag
@@ -22,13 +22,13 @@ type windowManager struct {
 	colorTable x.ColorTable
 }
 
-func newWindowManager() *windowManager {
+func newWindowManager() *wm {
 	var err error = nil
 	const screenMargin = 16
 
 	x.Initialize()
 
-	wm := &windowManager{}
+	wm := &wm{}
 	wm.bar = newBar()
 
 	masterStack := masterStack{screenMargin, 8, 0.5}
@@ -51,11 +51,11 @@ func newWindowManager() *windowManager {
 	return wm
 }
 
-func (wm *windowManager) dispose() {
+func (wm *wm) dispose() {
 	x.Conn.Close()
 }
 
-func (wm *windowManager) manage(win xproto.Window, class string) *client {
+func (wm *wm) manage(win xproto.Window, class string) *client {
 	log.Println("[wm.manage]", win)
 
 	geom, err := x.Geometry(win)
@@ -93,7 +93,7 @@ func (wm *windowManager) manage(win xproto.Window, class string) *client {
 	return client
 }
 
-func (wm *windowManager) applyRules(client *client, class string) {
+func (wm *wm) applyRules(client *client, class string) {
 	for _, r := range rules {
 		if r.class != class {
 			continue
@@ -105,7 +105,7 @@ func (wm *windowManager) applyRules(client *client, class string) {
 	}
 }
 
-func (wm *windowManager) updateWindowType(client *client) {
+func (wm *wm) updateWindowType(client *client) {
 	state, err := x.AtomPropertyAsAtom(client.window, x.NetWMState)
 	if err == nil && state == x.AtomOrNone(x.NetWMFullscreen) {
 		wm.enableFullscreen(client)
@@ -118,7 +118,7 @@ func (wm *windowManager) updateWindowType(client *client) {
 	}
 }
 
-func (wm *windowManager) removeClient(oldClient *client) {
+func (wm *wm) removeClient(oldClient *client) {
 
 	if oldClient == wm.focusedClient {
 		wm.focusedClient = nil
@@ -132,7 +132,7 @@ func (wm *windowManager) removeClient(oldClient *client) {
 	}
 }
 
-func (wm *windowManager) findClients(tagId uint16) []*client {
+func (wm *wm) findClients(tagId uint16) []*client {
 	clients := make([]*client, 0)
 
 	for _, c := range wm.clients {
@@ -144,7 +144,7 @@ func (wm *windowManager) findClients(tagId uint16) []*client {
 	return clients
 }
 
-func (wm *windowManager) windowToClient(window xproto.Window) (*client, bool) {
+func (wm *wm) windowToClient(window xproto.Window) (*client, bool) {
 	for _, c := range wm.clients {
 		if c.window == window {
 			return c, true
@@ -154,11 +154,11 @@ func (wm *windowManager) windowToClient(window xproto.Window) (*client, bool) {
 	return nil, false
 }
 
-func (wm *windowManager) isClientVisible(client *client) bool {
+func (wm *wm) isClientVisible(client *client) bool {
 	return client.hasTag(wm.currTag.id)
 }
 
-func (wm *windowManager) focus(client *client) {
+func (wm *wm) focus(client *client) {
 	if wm.focusedClient == client {
 		return
 	}
@@ -183,7 +183,7 @@ func (wm *windowManager) focus(client *client) {
 	)
 }
 
-func (wm *windowManager) unfocus(client *client) {
+func (wm *wm) unfocus(client *client) {
 	if client == nil {
 		return
 	}
@@ -195,7 +195,7 @@ func (wm *windowManager) unfocus(client *client) {
 	x.ChangeBorderColor(client.window, wm.colorTable[x.NormBorder])
 }
 
-func (wm *windowManager) ungrabAllButtons(client *client) {
+func (wm *wm) ungrabAllButtons(client *client) {
 	log.Println("[wm.ungrabAllButtons]", client.window)
 	xproto.UngrabButton(
 		x.Conn,
@@ -205,7 +205,7 @@ func (wm *windowManager) ungrabAllButtons(client *client) {
 	)
 }
 
-func (wm *windowManager) grabAnyButton(client *client) {
+func (wm *wm) grabAnyButton(client *client) {
 	log.Println("[wm.grabAnyButton]", client.window)
 
 	xproto.UngrabButton(
@@ -229,7 +229,7 @@ func (wm *windowManager) grabAnyButton(client *client) {
 	)
 }
 
-func (wm *windowManager) findTag(tagId uint16) (*tag, bool) {
+func (wm *wm) findTag(tagId uint16) (*tag, bool) {
 	for _, tag := range wm.tags {
 		if tag.id == tagId {
 			return tag, true
@@ -239,6 +239,6 @@ func (wm *windowManager) findTag(tagId uint16) (*tag, bool) {
 	return nil, false
 }
 
-func (wm *windowManager) cleanup() {
+func (wm *wm) cleanup() {
 	x.DeleteProperty(x.Root, x.NetActiveWindow)
 }

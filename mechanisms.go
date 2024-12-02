@@ -8,7 +8,7 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-func (wm *windowManager) enableFullscreen(client *client) {
+func (wm *wm) enableFullscreen(client *client) {
 	log.Println("[wm.enableFullscreen]", client.window)
 	x.ChangeProperty32(
 		client.window,
@@ -22,7 +22,7 @@ func (wm *windowManager) enableFullscreen(client *client) {
 	wm.view(wm.currTag)
 }
 
-func (wm *windowManager) disableFullscreen(client *client) {
+func (wm *wm) disableFullscreen(client *client) {
 	log.Println("[wm.disableFullscreen]", client.window)
 	x.ChangeProperty32(
 		client.window,
@@ -35,7 +35,7 @@ func (wm *windowManager) disableFullscreen(client *client) {
 	wm.view(wm.currTag)
 }
 
-func (wm *windowManager) findClientByClass(targetClass string) (*client, bool) {
+func (wm *wm) findClientByClass(targetClass string) (*client, bool) {
 	for _, c := range wm.clients {
 		_, clientClass := x.InstanceAndClass(c.window)
 		if targetClass == clientClass {
@@ -46,7 +46,7 @@ func (wm *windowManager) findClientByClass(targetClass string) (*client, bool) {
 	return nil, false
 }
 
-func (wm *windowManager) spawnIfNotExist(targetClass string, command string, args ...string) {
+func (wm *wm) spawnIfNotExist(targetClass string, command string, args ...string) {
 	_, found := wm.findClientByClass(targetClass)
 	if !found {
 		exec.Command(command, args...).Start()

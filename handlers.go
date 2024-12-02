@@ -9,7 +9,7 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-func (wm *windowManager) loop() {
+func (wm *wm) loop() {
 	go x.Loop()
 	go socket.Listen()
 
@@ -63,7 +63,7 @@ func (wm *windowManager) loop() {
 	}
 }
 
-func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
+func (wm *wm) onMapRequest(event xproto.MapRequestEvent) {
 	winAttrs, err := xproto.GetWindowAttributes(x.Conn, event.Window).Reply()
 	if err != nil {
 		log.Println(err)
@@ -97,13 +97,13 @@ func (wm *windowManager) onMapRequest(event xproto.MapRequestEvent) {
 	}
 }
 
-func (wm *windowManager) onConfigureNotify(event xproto.ConfigureNotifyEvent) {
+func (wm *wm) onConfigureNotify(event xproto.ConfigureNotifyEvent) {
 	if event.Window == x.Root {
 		log.Println("TODO: add handler for when root geometry changed")
 	}
 }
 
-func (wm *windowManager) onDestroyNotify(event xproto.DestroyNotifyEvent) {
+func (wm *wm) onDestroyNotify(event xproto.DestroyNotifyEvent) {
 	if wm.bar.win == event.Window {
 		wm.bar.onDestroyNotify(event)
 		wm.view(wm.currTag)
@@ -116,7 +116,7 @@ func (wm *windowManager) onDestroyNotify(event xproto.DestroyNotifyEvent) {
 	}
 }
 
-func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) {
+func (wm *wm) onConfigureRequest(event xproto.ConfigureRequestEvent) {
 	if wm.bar.win == event.Window {
 		wm.bar.onConfigureRequest(event)
 		return
@@ -178,7 +178,7 @@ func (wm *windowManager) onConfigureRequest(event xproto.ConfigureRequestEvent) 
 	}
 }
 
-func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
+func (wm *wm) onButtonPressEvent(event xproto.ButtonPressEvent) {
 	if event.Event == event.Root && event.Detail == xproto.ButtonIndex1 {
 		if event.RootX+20 > int16(x.Screen.WidthInPixels) {
 			wm.goToNextTag()
@@ -213,7 +213,7 @@ func (wm *windowManager) onButtonPressEvent(event xproto.ButtonPressEvent) {
 	)
 }
 
-func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
+func (wm *wm) onClientMessageEvent(event xproto.ClientMessageEvent) {
 	log.Printf("[wm.onClientMessageEvent] msg: %d; win: %d\n", event.Type, event.Window)
 
 	client, ok := wm.windowToClient(event.Window)
@@ -264,13 +264,13 @@ func (wm *windowManager) onClientMessageEvent(event xproto.ClientMessageEvent) {
 	}
 }
 
-func (wm *windowManager) onMapNotifyEvent(event xproto.MapNotifyEvent) {
+func (wm *wm) onMapNotifyEvent(event xproto.MapNotifyEvent) {
 	if wm.bar.win == event.Window {
 		wm.view(wm.currTag)
 	}
 }
 
-func (wm *windowManager) propertyNotifyEvent(event xproto.PropertyNotifyEvent) {
+func (wm *wm) propertyNotifyEvent(event xproto.PropertyNotifyEvent) {
 	if event.State == xproto.PropertyDelete {
 		return
 	}

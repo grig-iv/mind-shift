@@ -17,11 +17,11 @@ const (
 	Backward direction = iota
 )
 
-func (wm *windowManager) quit() {
+func (wm *wm) quit() {
 	wm.isRunning = false
 }
 
-func (wm *windowManager) killClient() {
+func (wm *wm) killClient() {
 	if wm.focusedClient == nil {
 		return
 	}
@@ -32,7 +32,7 @@ func (wm *windowManager) killClient() {
 	xproto.UngrabServer(x.Conn)
 }
 
-func (wm *windowManager) getPrevTag() *tag {
+func (wm *wm) getPrevTag() *tag {
 	for i := range wm.tags {
 		i = len(wm.tags) - i - 1
 		if wm.tags[i] == wm.currTag {
@@ -42,7 +42,7 @@ func (wm *windowManager) getPrevTag() *tag {
 	return nil
 }
 
-func (wm *windowManager) getNextTag() *tag {
+func (wm *wm) getNextTag() *tag {
 	for i := range wm.tags {
 		if wm.tags[i] == wm.currTag {
 			return wm.tags[(i+1)%len(wm.tags)]
@@ -51,15 +51,15 @@ func (wm *windowManager) getNextTag() *tag {
 	return nil
 }
 
-func (wm *windowManager) goToPrevTag() {
+func (wm *wm) goToPrevTag() {
 	wm.view(wm.getPrevTag())
 }
 
-func (wm *windowManager) goToNextTag() {
+func (wm *wm) goToNextTag() {
 	wm.view(wm.getNextTag())
 }
 
-func (wm *windowManager) view(tag *tag) {
+func (wm *wm) view(tag *tag) {
 	log.Println("[wm.view] tag number:", tag.index()+1)
 
 	wm.currTag = tag
@@ -105,15 +105,15 @@ func (wm *windowManager) view(tag *tag) {
 	}
 }
 
-func (wm *windowManager) moveToPrevTag() {
+func (wm *wm) moveToPrevTag() {
 	wm.moveToTag(wm.getPrevTag())
 }
 
-func (wm *windowManager) moveToNextTag() {
+func (wm *wm) moveToNextTag() {
 	wm.moveToTag(wm.getNextTag())
 }
 
-func (wm *windowManager) moveToTag(tag *tag) {
+func (wm *wm) moveToTag(tag *tag) {
 	if wm.focusedClient == nil || wm.currTag.id == tag.id {
 		return
 	}
@@ -131,7 +131,7 @@ func (wm *windowManager) moveToTag(tag *tag) {
 	wm.view(tag)
 }
 
-func (wm *windowManager) gotoWindow(targetClass string) bool {
+func (wm *wm) gotoWindow(targetClass string) bool {
 	client, ok := wm.findClientByClass(targetClass)
 	if ok {
 		tag, _ := wm.findTag(client.tagMask)
@@ -146,7 +146,7 @@ func (wm *windowManager) gotoWindow(targetClass string) bool {
 	return ok
 }
 
-func (wm *windowManager) gotoWindowOrSpawn(targetClass string, command string, args ...string) {
+func (wm *wm) gotoWindowOrSpawn(targetClass string, command string, args ...string) {
 	found := wm.gotoWindow(targetClass)
 	if found {
 		return

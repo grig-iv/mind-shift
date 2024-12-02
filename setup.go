@@ -7,7 +7,7 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-func (wm *windowManager) setup() {
+func (wm *wm) setup() {
 	x.CheckOtherWm()
 	wm.scan()
 	wm.view(wm.currTag)
@@ -25,7 +25,7 @@ func (wm *windowManager) setup() {
 	}
 }
 
-func (wm *windowManager) scan() {
+func (wm *wm) scan() {
 	queryTree, err := xproto.QueryTree(x.Conn, x.Root).Reply()
 	if err != nil {
 		log.Println(err)
