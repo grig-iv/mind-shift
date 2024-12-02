@@ -77,11 +77,8 @@ func (wm *windowManager) manage(win xproto.Window, class string) *client {
 		false,
 	}
 
-	transient, err := x.AtomProperty(win, x.WMTransientName)
-	if err != nil {
-		log.Println(err)
-	}
-	if len(transient.Value) != 0 {
+	transient, ok := x.GetTransientFor(win)
+	if ok {
 		log.Println("Fount transient window: ", transient)
 	}
 

@@ -198,6 +198,29 @@ func ChangeProperty32(
 	)
 }
 
+func GetTransientFor(win xproto.Window) (xproto.Window, bool) {
+	transient, err := xproto.GetProperty(
+		Conn,
+		false,
+		win,
+		AtomOrNone(WMTransientName),
+		xproto.AtomWindow,
+		0,
+		1,
+	).Reply()
+
+	if err != nil {
+		log.Println(err)
+		return 0, false
+	}
+
+	if transient.ValueLen == 0 || transient.Format != 32 {
+		return 0, false
+	}
+
+	return xproto.Window(xgb.Get32(transient.Value)), true
+}
+
 func toBuf32(data ...uint) []byte {
 	buf := make([]byte, len(data)*4)
 	for i, datum := range data {
