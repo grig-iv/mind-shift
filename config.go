@@ -22,5 +22,4 @@ var rules = []rule{
 func onStartup(wm *wm) {
 	wm.spawnIfNotExist(weztermClass, "wezterm", "-e", "tmuxp", "load", "main", "-y")
 	wm.spawnIfNotExist(firefoxClass, "firefox")
-	wm.spawnIfNotExist(telegramClass, "telegram-desktop")
 }
