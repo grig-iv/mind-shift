@@ -9,7 +9,8 @@ import (
 )
 
 type wm struct {
-	bar *bar
+	bar      *bar
+	kbLayout *kbLayout
 
 	tags    []*tag
 	currTag *tag
@@ -30,6 +31,7 @@ func newWindowManager() *wm {
 
 	wm := &wm{}
 	wm.bar = newBar()
+	wm.kbLayout = newKbLayout()
 
 	masterStack := masterStack{screenMargin, 8, 0.5}
 	wm.tags = []*tag{

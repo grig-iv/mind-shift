@@ -62,6 +62,8 @@ func (wm *wm) goToNextTag() {
 func (wm *wm) view(tag *tag) {
 	log.Println("[wm.view] tag number:", tag.index()+1)
 
+	wm.kbLayout.update(wm.currTag.id, tag.id)
+
 	wm.currTag = tag
 
 	tagClients := make([]*client, 0)
