@@ -40,6 +40,8 @@ func (wm *wm) loop() {
 				wm.onClientMessageEvent(ev)
 			case xproto.MapNotifyEvent:
 				wm.onMapNotifyEvent(ev)
+			case xproto.UnmapNotifyEvent:
+				wm.unmapNotifyEvent(ev)
 			case xproto.PropertyNotifyEvent:
 				log.Println("-> PropertyNotifyEvent")
 				wm.propertyNotifyEvent(ev)
@@ -270,6 +272,13 @@ func (wm *wm) onMapNotifyEvent(event xproto.MapNotifyEvent) {
 	}
 }
 
+func (wm *wm) unmapNotifyEvent(event xproto.UnmapNotifyEvent) {
+	if client, ok := wm.windowToClient(event.Window); ok {
+		wm.removeClient(client)
+		wm.view(wm.currTag)
+	}
+}
+
 func (wm *wm) propertyNotifyEvent(event xproto.PropertyNotifyEvent) {
 	if event.State == xproto.PropertyDelete {
 		return
@@ -284,7 +293,10 @@ func (wm *wm) propertyNotifyEvent(event xproto.PropertyNotifyEvent) {
 	case xproto.AtomWmHints:
 		fmt.Println("TODO: add handaling for AtomWmHints")
 	case xproto.AtomWmTransientFor:
-		fmt.Println("TODO: add handaling for AtomWmTransientFor")
+		transient, ok := x.GetTransientFor(event.Window)
+		if ok {
+			fmt.Println("TODO: add handaling for AtomWmTransientFor", transient)
+		}
 	case x.AtomOrNone(x.NetWMWindowType):
 		wm.updateWindowType(client)
 	}

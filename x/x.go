@@ -228,3 +228,54 @@ func toBuf32(data ...uint) []byte {
 	}
 	return buf
 }
+
+func SendEvent(win xproto.Window, protoName AtomName) bool {
+	wmProtocolsAtom := AtomOrNone(WMProtocols)
+
+	proto, err := Atom(protoName)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	reply, err := xproto.GetProperty(
+		Conn, false, win,
+		wmProtocolsAtom, xproto.AtomAtom,
+		0, (1<<32)-1,
+	).Reply()
+
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	exists := false
+	if reply != nil && reply.Format == 32 {
+		for i := 0; i < int(reply.ValueLen); i++ {
+			if xproto.Atom(reply.Value[i*4]) == proto {
+				exists = true
+				break
+			}
+		}
+	}
+
+	if exists {
+		ev := xproto.ClientMessageEvent{
+			Format: 32,
+			Window: win,
+			Type:   wmProtocolsAtom,
+			Data: xproto.ClientMessageDataUnionData32New([]uint32{
+				uint32(proto),
+				uint32(xproto.TimeCurrentTime),
+				0, 0, 0,
+			}),
+		}
+		err = xproto.SendEventChecked(Conn, false, win, xproto.EventMaskNoEvent, string(ev.Bytes())).Check()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+	}
+
+	return exists
+}

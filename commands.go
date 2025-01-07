@@ -66,7 +66,7 @@ func (wm *wm) view(tag *tag) {
 
 	tagClients := make([]*client, 0)
 	for _, c := range wm.clients {
-		if c.hasTag(wm.currTag.id) {
+		if c.hasTag(wm.currTag.id) && !c.isFullscreen {
 			tagClients = append(tagClients, c)
 		} else {
 			xproto.ConfigureWindow(
@@ -101,6 +101,14 @@ func (wm *wm) view(tag *tag) {
 
 	if (wm.focusedClient == nil || wm.focusedClient.hasTag(tag.id) == false) && len(tagClients) > 0 {
 		wm.unfocus(wm.focusedClient)
+
+		for _, c := range wm.clients {
+			if c.isFullscreen {
+				wm.focus(c)
+				return
+			}
+		}
+
 		wm.focus(tagClients[0])
 	}
 }
