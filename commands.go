@@ -63,20 +63,23 @@ func (wm *wm) view(tag *tag) {
 	log.Println("[wm.view] tag number:", tag.index()+1)
 
 	wm.kbLayout.update(wm.currTag.id, tag.id)
-
 	wm.currTag = tag
 
 	tagClients := make([]*client, 0)
+	tagFullscreenClients := make([]*client, 0)
+
 	for _, c := range wm.clients {
-		if c.hasTag(wm.currTag.id) && !c.isFullscreen {
-			tagClients = append(tagClients, c)
-		} else {
+		if !c.hasTag(wm.currTag.id) {
 			xproto.ConfigureWindow(
 				x.Conn,
 				c.window,
 				uint16(xproto.ConfigWindowX),
 				[]uint32{uint32(c.geom.Width * -2)},
 			)
+		} else if c.isFullscreen {
+			tagFullscreenClients = append(tagFullscreenClients, c)
+		} else {
+			tagClients = append(tagClients, c)
 		}
 	}
 
@@ -91,14 +94,14 @@ func (wm *wm) view(tag *tag) {
 
 	geoms := wm.currTag.currLaout.arrange(tagAreaGeom, len(tagClients))
 	for i, c := range tagClients {
-		if c.isFullscreen {
-			x.ChangeGeometry(c.window, screenGeom)
-		} else {
-			c.geom = geoms[i]
-			c.geom.Width -= borderWidth * 2
-			c.geom.Height -= borderWidth * 2
-			x.ChangeGeometry(c.window, c.geom)
-		}
+		c.geom = geoms[i]
+		c.geom.Width -= borderWidth * 2
+		c.geom.Height -= borderWidth * 2
+		x.ChangeGeometry(c.window, c.geom)
+	}
+
+	for _, c := range tagFullscreenClients {
+		x.ChangeGeometry(c.window, screenGeom)
 	}
 
 	if (wm.focusedClient == nil || wm.focusedClient.hasTag(tag.id) == false) && len(tagClients) > 0 {
